@@ -1,0 +1,42 @@
+@import "../../../styles/app.scss";
+
+.nav {
+  height: 70px;
+  padding: 1.5em 4em;
+  background-color: $black-900;
+  color: $white;
+  height: 70px;
+  z-index: 10;
+
+  @media (max-width: 480px) {
+    padding: 1.5em;
+  }
+
+  ul {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.5em;
+
+    @media (max-width: 480px) {
+      font-size: 12px;
+      gap: 1em;
+    }
+
+    li {
+      list-style: none;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+}
+
+.fixed {
+  position: fixed;
+  width: 100%;
+}
