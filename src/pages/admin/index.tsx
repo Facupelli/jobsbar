@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { type GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { authOptions } from "~/server/auth";
 import { prisma } from "~/server/db";
 
@@ -17,6 +17,9 @@ import {
 
 import type { Consumption, Membership, Promotion, User } from "~/types/model";
 import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
+import Modal from "~/components/Modal";
+import { useForm } from "react-hook-form";
+import { api } from "~/utils/api";
 
 type Props = {
   allConsumptionsByCategories: ConsumptionsGrouped[];
@@ -90,54 +93,164 @@ export default function Admin({
 }
 
 function Memberships({ memberships }: { memberships: Membership[] }) {
+  const [showModal, setShowModal] = useState(false);
+
   return (
-    <section>
-      <h1 className="p-3 text-lg font-semibold">Membresías</h1>
-      <Table trTitles={["Nombre", "Puntos Mínimos", "Puntos Máximos"]}>
-        {memberships.map((membership) => (
-          <tr key={membership.id}>
-            <td className="border-b border-gray-300 p-3">{membership.name}</td>
-            <td className="border-b border-gray-300 p-3">
-              {membership.minPoints}
-            </td>
-            <td className="border-b border-gray-300 p-3">
-              {membership.maxPoints}
-            </td>
-            <td className="border-b border-gray-300 p-3">Editar</td>
-            <td className="border-b border-gray-300 p-3">Eliminar</td>
-          </tr>
-        ))}
-      </Table>
-    </section>
+    <>
+      {showModal && (
+        <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
+          <CreateMembership setShowModal={setShowModal} />
+        </Modal>
+      )}
+      <section>
+        <div className="flex items-center justify-between pb-6">
+          <h1 className="p-3 text-lg font-semibold">Membresías</h1>
+          <button
+            type="button"
+            onClick={() => setShowModal(true)}
+            className="rounded bg-green-500 p-2 text-neutral-100"
+          >
+            Crear membresía
+          </button>
+        </div>
+        <Table trTitles={["Nombre", "Puntos Mínimos", "Puntos Máximos"]}>
+          {memberships.map((membership) => (
+            <tr key={membership.id}>
+              <td className="border-b border-gray-300 p-3">
+                {membership.name}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {membership.minPoints}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {membership.maxPoints}
+              </td>
+              <td className="border-b border-gray-300 p-3">Editar</td>
+              <td className="border-b border-gray-300 p-3">Eliminar</td>
+            </tr>
+          ))}
+        </Table>
+      </section>
+    </>
   );
 }
+
+type MembershipData = {
+  name: string;
+  minPoints: number;
+  maxPoints: number;
+};
+function CreateMembership({
+  setShowModal,
+}: {
+  setShowModal: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { register, handleSubmit } = useForm<MembershipData>();
+  const { mutate } = api.admin.postMembership.useMutation();
+
+  const onSubmit = (data: MembershipData) => {
+    mutate(data, {
+      onSuccess: () => {
+        setShowModal(false);
+      },
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      <div className="grid gap-1">
+        <label htmlFor="name">Nombre:</label>
+        <input
+          className="rounded border border-neutral-600 p-1"
+          type="text"
+          id="name"
+          required
+          {...register("name")}
+        />
+      </div>
+      <div className="grid gap-1">
+        <label htmlFor="minPoints">Puntos mínimos:</label>
+        <input
+          className="rounded border border-neutral-600 p-1"
+          type="text"
+          id="minPoints"
+          required
+          {...register("minPoints", { valueAsNumber: true })}
+        />
+      </div>
+      <div className="grid gap-1">
+        <label htmlFor="maxPoints">Puntos máximos:</label>
+        <input
+          className="rounded border border-neutral-600 p-1"
+          type="text"
+          id="maxPoints"
+          required
+          {...register("maxPoints", { valueAsNumber: true })}
+        />
+      </div>
+      <button
+        type="submit"
+        className="rounded-sm bg-green-500 p-1 font-semibold text-neutral-100"
+      >
+        CREAR
+      </button>
+    </form>
+  );
+}
+
+type Active = "Comida" | "Bebida" | "Juego";
 
 function Consumptions({
   consumptions,
 }: {
   consumptions: ConsumptionsGrouped[];
 }) {
+  const [active, setActive] = useState<Active>("Bebida");
+
+  const selectedConsumption = consumptions.find(
+    (category) => category.name === active
+  );
+
   return (
-    <section className="grid gap-10">
-      {consumptions.map((category) => (
-        <div key={category.id}>
-          <h1 className="p-3 text-lg font-semibold">{category.name}</h1>
-          <Table key={category.id} trTitles={["Nombre", "Puntos"]}>
-            {category.consumptions.map((consumption) => (
-              <tr key={consumption.name}>
-                <td className="border-b border-gray-300 p-3">
-                  {consumption.name}
-                </td>
-                <td className="border-b border-gray-300 p-3">
-                  {consumption.points}
-                </td>
-                <td className="border-b border-gray-300 p-3">Editar</td>
-                <td className="border-b border-gray-300 p-3">Eliminar</td>
-              </tr>
-            ))}
-          </Table>
-        </div>
-      ))}
+    <section className="gap-10">
+      <nav className="fixed left-[220px] top-[70px] h-[calc(100vh_-_70px)] w-[120px] bg-neutral-800">
+        <ul className="grid gap-4 text-neutral-100">
+          {consumptions.map((category) => (
+            <li
+              key={category.id}
+              className={`p-4 ${
+                active === category.name
+                  ? "border-r-[6px] border-green-500 font-semibold"
+                  : ""
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setActive(category.name as Active)}
+              >
+                {category.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div className="ml-[120px]">
+        <h1 className="p-3 text-lg font-semibold">{active}</h1>
+        <Table trTitles={["Nombre", "Puntos"]}>
+          {selectedConsumption?.consumptions.map((consumption) => (
+            <tr key={consumption.name}>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.name}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.points}
+              </td>
+              <td className="border-b border-gray-300 p-3">Editar</td>
+              <td className="border-b border-gray-300 p-3">Eliminar</td>
+            </tr>
+          ))}
+        </Table>
+      </div>
     </section>
   );
 }
@@ -176,10 +289,10 @@ function Promotions({
               {promo.consumptions
                 ?.filter(
                   (consumption) =>
-                    consumption.consumption.consumptionCategory?.name ===
+                    consumption.consumption?.consumptionCategory?.name ===
                     "Bebida"
                 )
-                .map((consumption) => consumption.consumption.name)
+                .map((consumption) => consumption.consumption?.name)
                 .join(", ")}
             </td>
             <td className="border-b border-gray-300 p-3">
@@ -189,7 +302,7 @@ function Promotions({
                     consumption.consumption?.consumptionCategory?.name ===
                     "Comida"
                 )
-                .map((consumption) => consumption.consumption.name)
+                .map((consumption) => consumption.consumption?.name)
                 .join(", ")}
             </td>
             <td className="border-b border-gray-300 p-3">
@@ -199,7 +312,7 @@ function Promotions({
                     consumption.consumption?.consumptionCategory?.name ===
                     "Juego"
                 )
-                .map((consumption) => consumption.consumption.name)
+                .map((consumption) => consumption.consumption?.name)
                 .join(", ")}
             </td>
             <td className="border-b border-gray-300 p-3">{promo.discount}%</td>

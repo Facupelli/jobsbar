@@ -15,7 +15,7 @@ export default function AdminLayout({
   return (
     <div className="flex gap-2">
       <AdminNav route={route} setRoute={setRoute} />
-      <div className="ml-[220px] mt-[70px] w-full max-w-screen-2xl p-4">
+      <div className="ml-[220px] mt-[70px] w-full max-w-screen-2xl p-6">
         {children}
       </div>
     </div>
