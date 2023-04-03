@@ -17,16 +17,13 @@ import Table from "~/components/Table";
 import Modal from "~/components/Modal";
 
 import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
-import type { Consumption, Membership, Promotion, User } from "~/types/model";
-
-type Props = {
-  allConsumptionsByCategories: ConsumptionsGrouped[];
-  allMemberships: Membership[];
-  allPromotions: Promotion[];
-  allConsumptions: Consumption[];
-  allUsers: User[];
-  usersCount: number;
-};
+import type { Membership, User } from "~/types/model";
+import type {
+  Active,
+  CreateConsumption,
+  CreateMembership,
+  CreateUser,
+} from "~/types/admin";
 
 export type Routes =
   | "home"
@@ -35,14 +32,7 @@ export type Routes =
   | "promotions"
   | "users";
 
-export default function Admin({
-  allMemberships,
-  allConsumptionsByCategories,
-  allPromotions,
-  allConsumptions,
-  allUsers,
-  usersCount,
-}: Props) {
+export default function Admin() {
   const memberships = api.membership.getAllMemberships.useQuery();
   const users = api.user.getAllUsers.useQuery();
   const promotions = api.promotions.getAllPromotions.useQuery();
@@ -139,21 +129,16 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
   );
 }
 
-type MembershipData = {
-  name: string;
-  minPoints: number;
-  maxPoints: number;
-};
 function CreateMembership({
   setShowModal,
 }: {
   setShowModal: Dispatch<SetStateAction<boolean>>;
 }) {
   const ctx = api.useContext();
-  const { register, handleSubmit } = useForm<MembershipData>();
+  const { register, handleSubmit } = useForm<CreateMembership>();
   const { mutate } = api.admin.postMembership.useMutation();
 
-  const onSubmit = (data: MembershipData) => {
+  const onSubmit = (data: CreateMembership) => {
     mutate(data, {
       onSuccess: () => {
         setShowModal(false);
@@ -204,60 +189,151 @@ function CreateMembership({
   );
 }
 
-type Active = "Comida" | "Bebida" | "Juego";
-
 function Consumptions({
   consumptions,
 }: {
   consumptions: ConsumptionsGrouped[];
 }) {
+  const [showModal, setShowModal] = useState(false);
   const [active, setActive] = useState<Active>("Bebida");
 
   const selectedConsumption = consumptions.find(
     (category) => category.name === active
   );
 
+  const categories = consumptions.map((c) => ({ name: c.name, id: c.id }));
+
   return (
-    <section className="gap-10">
-      <nav className="fixed left-[220px] top-[70px] h-[calc(100vh_-_70px)] w-[120px] bg-neutral-800">
-        <ul className="grid gap-4 text-neutral-100">
-          {consumptions.map((category) => (
-            <li
-              key={category.id}
-              className={`p-4 ${
-                active === category.name
-                  ? "border-r-[6px] border-green-500 font-semibold"
-                  : ""
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => setActive(category.name as Active)}
+    <>
+      {showModal && (
+        <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
+          <CreateConsumption
+            setShowModal={setShowModal}
+            categories={categories}
+            active={active}
+          />
+        </Modal>
+      )}
+      <section className="gap-10">
+        <nav className="fixed left-[220px] top-[70px] h-[calc(100vh_-_70px)] w-[120px] bg-neutral-800">
+          <ul className="grid gap-4 text-neutral-100">
+            {consumptions.map((category) => (
+              <li
+                key={category.id}
+                className={`p-4 ${
+                  active === category.name
+                    ? "border-r-[6px] border-green-500 font-semibold"
+                    : ""
+                }`}
               >
-                {category.name}
-              </button>
-            </li>
+                <button
+                  type="button"
+                  onClick={() => setActive(category.name as Active)}
+                >
+                  {category.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="ml-[120px]">
+          <div className="flex items-center justify-between pb-6">
+            <h1 className="p-3 text-lg font-semibold">{active}</h1>
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="rounded bg-green-500 p-2 text-neutral-100"
+            >
+              Crear {active}
+            </button>
+          </div>
+          <Table trTitles={["Nombre", "Puntos"]}>
+            {selectedConsumption?.consumptions.map((consumption) => (
+              <tr key={consumption.name}>
+                <td className="border-b border-gray-300 p-3">
+                  {consumption.name}
+                </td>
+                <td className="border-b border-gray-300 p-3">
+                  {consumption.points}
+                </td>
+                <td className="border-b border-gray-300 p-3">Editar</td>
+                <td className="border-b border-gray-300 p-3">Eliminar</td>
+              </tr>
+            ))}
+          </Table>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function CreateConsumption({
+  setShowModal,
+  categories,
+  active,
+}: {
+  setShowModal: Dispatch<SetStateAction<boolean>>;
+  categories: { id: string; name: string }[];
+  active: Active;
+}) {
+  const { register, handleSubmit } = useForm<CreateConsumption>({
+    defaultValues: {
+      categoryId: categories.find((c) => c.name === active)?.id,
+    },
+  });
+  const ctx = api.useContext();
+  const { mutate } = api.admin.postConsumption.useMutation();
+
+  const onSubmit = (data: CreateConsumption) => {
+    mutate(data, {
+      onSuccess: () => {
+        setShowModal(false);
+        ctx.consumptions.getConsumptionsGrouped.invalidate();
+      },
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      <div className="grid gap-1">
+        <label>Tipo:</label>
+        <select
+          {...register("categoryId")}
+          className="rounded border border-neutral-600 p-1"
+        >
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
           ))}
-        </ul>
-      </nav>
-      <div className="ml-[120px]">
-        <h1 className="p-3 text-lg font-semibold">{active}</h1>
-        <Table trTitles={["Nombre", "Puntos"]}>
-          {selectedConsumption?.consumptions.map((consumption) => (
-            <tr key={consumption.name}>
-              <td className="border-b border-gray-300 p-3">
-                {consumption.name}
-              </td>
-              <td className="border-b border-gray-300 p-3">
-                {consumption.points}
-              </td>
-              <td className="border-b border-gray-300 p-3">Editar</td>
-              <td className="border-b border-gray-300 p-3">Eliminar</td>
-            </tr>
-          ))}
-        </Table>
+        </select>
       </div>
-    </section>
+
+      <div className="grid gap-1">
+        <label>Nombre:</label>
+        <input
+          type="text"
+          {...register("name")}
+          className="rounded border border-neutral-600 p-1"
+        />
+      </div>
+
+      <div className="grid gap-1">
+        <label>Puntos:</label>
+        <input
+          type="text"
+          {...register("points", { valueAsNumber: true })}
+          className="rounded border border-neutral-600 p-1"
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="rounded-sm bg-green-500 p-1 font-semibold text-neutral-100"
+      >
+        CREAR
+      </button>
+    </form>
   );
 }
 
@@ -384,10 +460,6 @@ function Users({ users, totalUsers }: { users: User[]; totalUsers: number }) {
     </>
   );
 }
-
-type CreateUser = {
-  name: string;
-};
 
 function CreateUser({
   setShowModal,
