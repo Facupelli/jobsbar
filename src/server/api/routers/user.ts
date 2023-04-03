@@ -7,6 +7,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import { fetchUserConsumptionsByCategories } from "~/utils/admin";
 
 export const userRouter = createTRPCRouter({
   getUserById: publicProcedure
@@ -49,6 +50,34 @@ export const userRouter = createTRPCRouter({
         }
 
         return user;
+      } catch (err) {
+        console.log(err);
+      }
+    }),
+
+  getUserConsumptionsGrouped: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      try {
+        const categories = await fetchUserConsumptionsByCategories(input.id);
+
+        if (!categories) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Consumptions not found",
+          });
+        }
+
+        const consumptionsByCategory = categories.map((category) => ({
+          id: category.id,
+          name: category.name,
+          consumptions: category.consumptions.map((c) => ({
+            ...c,
+            users: c.users.filter((user) => user.userId === input.id),
+          })),
+        }));
+
+        return consumptionsByCategory;
       } catch (err) {
         console.log(err);
       }

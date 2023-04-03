@@ -13,7 +13,10 @@ import { api } from "~/utils/api";
 import type { User } from "~/types/model";
 import { Membership } from "~/types/model";
 import { ConsumptionOnUser } from "~/types/model";
-import { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
+import {
+  ConsumptionsGrouped,
+  UserConsumptionsGrouped,
+} from "~/types/consumptionsByCategory";
 import Table from "~/components/Table";
 
 // import { useUserIdHotkeys } from "../../src/hooks/useUserIdHotkeys";
@@ -31,12 +34,16 @@ const UserDetail: NextPage<Props> = ({ id }) => {
     id,
   });
   const consumptions = api.consumptions.getConsumptionsGrouped.useQuery();
+  const userConsumptionsGrouped = api.user.getUserConsumptionsGrouped.useQuery({
+    id,
+  });
 
   const [error, setError] = useState<string>("");
   const [consumptionActive, setConsumptionActive] =
     useState<ConsumptionActive>("Bebida");
 
-  if (!user.data || !consumptions.data) return <div>404</div>;
+  if (!user.data || !consumptions.data || !userConsumptionsGrouped.data)
+    return <div>404</div>;
 
   const selectedConsumption = consumptions.data.find(
     (consumption) => consumption.name === consumptionActive
@@ -89,43 +96,13 @@ const UserDetail: NextPage<Props> = ({ id }) => {
           )}
 
           <section>
-            <details>
-              <summary>Últimas consumiciones:</summary>
-              <Table trTitles={["consumición", "ganó?", "cantidad", "fecha"]}>
-                {user.data.consumptions.slice(0, 10).map((consumption) => (
-                  <tr key={consumption.id}>
-                    <td className="border-b border-gray-300 p-3">
-                      {consumption.consumption.name}
-                    </td>
-                    <td className="border-b border-gray-300 p-3">
-                      {consumption.consumption.name}
-                    </td>
-                    <td className="border-b border-gray-300 p-3">
-                      {consumption.quantity}
-                    </td>
-                    <td className="border-b border-gray-300 p-3">
-                      {" "}
-                      {new Date(consumption.createdAt).toLocaleDateString(
-                        "es-AR",
-                        {
-                          year: "numeric",
-                          day: "numeric",
-                          month: "short",
-                        }
-                      )}
-                      {" - "}
-                      {new Date(consumption.createdAt).toLocaleTimeString(
-                        "es-AR",
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </Table>
-            </details>
+            <LastConsumptions userConsumptions={user.data.consumptions} />
+          </section>
+
+          <section>
+            <TotalConsumptions
+              userConsumptionsGrouped={userConsumptionsGrouped.data}
+            />
           </section>
         </div>
       </main>
@@ -224,6 +201,76 @@ function ConsumptionsList({
         </div>
       ))}
     </div>
+  );
+}
+
+function LastConsumptions({
+  userConsumptions,
+}: {
+  userConsumptions: ConsumptionOnUser[];
+}) {
+  return (
+    <details className="rounded-sm bg-white p-4">
+      <summary className="cursor-pointer pb-4">Últimas consumiciones:</summary>
+      <Table trTitles={["consumición", "ganó?", "cantidad", "fecha"]}>
+        {userConsumptions.slice(0, 10).map((consumption) => (
+          <tr key={consumption.id}>
+            <td className="border-b border-gray-300 p-3">
+              {consumption.consumption?.name}
+            </td>
+            <td className="border-b border-gray-300 p-3">
+              {consumption.consumption?.name}
+            </td>
+            <td className="border-b border-gray-300 p-3">
+              {consumption.quantity}
+            </td>
+            <td className="border-b border-gray-300 p-3">
+              {new Date(consumption.createdAt).toLocaleDateString("es-AR", {
+                year: "numeric",
+                day: "numeric",
+                month: "short",
+              })}
+              {" - "}
+              {new Date(consumption.createdAt).toLocaleTimeString("es-AR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </td>
+          </tr>
+        ))}
+      </Table>
+    </details>
+  );
+}
+
+function TotalConsumptions({
+  userConsumptionsGrouped,
+}: {
+  userConsumptionsGrouped: UserConsumptionsGrouped[];
+}) {
+  return (
+    <details className="rounded-sm bg-white p-4">
+      <summary className="cursor-pointer pb-4">Consumiciones totals:</summary>
+      <div className="grid grid-cols-3 gap-4">
+        {userConsumptionsGrouped.map((category) => (
+          <div key={category.id} className="col-span-1">
+            <p className="pb-2 pl-1 text-sm font-light">{category.name}</p>
+            <Table key={category.id} trTitles={["Nombre", "Cantidad"]}>
+              {category.consumptions.map((consumption) => (
+                <tr key={consumption.name}>
+                  <td className="border-b border-gray-300 p-3">
+                    {consumption.name}
+                  </td>
+                  <td className="border-b border-gray-300 p-3">
+                    {consumption.users.length}
+                  </td>
+                </tr>
+              ))}
+            </Table>
+          </div>
+        ))}
+      </div>
+    </details>
   );
 }
 
