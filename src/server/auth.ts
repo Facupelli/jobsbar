@@ -42,7 +42,6 @@ export const authOptions: NextAuthOptions = {
         where: { email: user.email },
         include: { role: true },
       });
-      console.log("USER", dbUser);
       if (session.user && dbUser) {
         session.user.id = user.id;
         session.user.role = dbUser.role?.name;

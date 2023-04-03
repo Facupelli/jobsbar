@@ -2,13 +2,33 @@ import { useState } from "react";
 import Head from "next/head";
 import AdminLayout from "~/components/Admin/AdminLayout";
 import Nav from "~/components/Nav";
+import { GetServerSideProps } from "next";
+import { authOptions, getServerAuthSession } from "~/server/auth";
+import { getServerSession } from "next-auth";
+import { prisma } from "~/server/db";
+import Table from "~/components/Table";
 
-export default function Admin() {
+type Props = {
+  consumptionsByCategories: {
+    consumptions: { name: string; points: number }[];
+    id: string;
+    name: string;
+  }[];
+};
+
+export type Routes = "home" | "memberships" | "consumptions" | "promotions";
+
+export default function Admin({ consumptionsByCategories }: Props) {
+  const [route, setRoute] = useState<Routes>("home");
+
+  const [consumptions, setConsumptions] = useState(consumptionsByCategories);
   // const [drinks, setDrinks] = useState<SortedConsumption[]>(drinksList);
   // const [games, setGames] = useState<SortedConsumption[]>(gamesList);
   // const [promotions, setPromotions] =
   //   useState<SortedPromotion[]>(promotionsList);
   // const [users, setUsers] = useState<User[]>(usersList);
+
+  console.log(consumptionsByCategories);
 
   return (
     <div className="">
@@ -21,62 +41,89 @@ export default function Admin() {
       <Nav route="admin" />
 
       <main className="min-h-screen bg-gray-200">
-        <AdminLayout route="admin">
-          <section className="">
-            <article>
-              <h5>Bebida más bebida</h5>
-              {/* <Table trTitles={trDrinkTitle}>
-                  {drinks?.map((drink) => (
-                    <RankingRow
-                      key={drink.id}
-                      name={drink.name}
-                      total={drink.total}
-                    />
-                  ))}
-                </Table> */}
-            </article>
-
-            <article>
-              <h5>Juego más jugado</h5>
-              {/* <Table trTitles={trGameTitle}>
-                  {games?.map((game) => (
-                    <RankingRow
-                      key={game.id}
-                      name={game.name}
-                      total={game.total}
-                    />
-                  ))}
-                </Table> */}
-            </article>
-
-            <article>
-              <h5>Promo más canjeada</h5>
-              {/* <Table trTitles={trPromotionTitle}>
-                  {promotions?.map((promotion) => (
-                    <RankingRow
-                      key={promotion.id}
-                      name={promotion.name}
-                      total={promotion.total}
-                    />
-                  ))}
-                </Table> */}
-            </article>
-
-            <article>
-              <h5>Jugadores con más puntos canjeados</h5>
-              {/* <Table trTitles={trPromotionTitle}>
-                  {users?.map((user) => (
-                    <RankingRow
-                      key={user.id}
-                      name={user.fullName}
-                      total={user.totalPointsSpent}
-                    />
-                  ))}
-                </Table> */}
-            </article>
-          </section>
+        <AdminLayout route={route} setRoute={setRoute}>
+          {route === "consumptions" && (
+            <Consumptions consumptions={consumptions} />
+          )}
         </AdminLayout>
       </main>
     </div>
   );
 }
+
+function Consumptions({
+  consumptions,
+}: {
+  consumptions: {
+    consumptions: { name: string; points: number }[];
+    id: string;
+    name: string;
+  }[];
+}) {
+  return (
+    <section className="grid gap-10">
+      {consumptions.map((category) => (
+        <div>
+          <h1 className="p-3 text-lg font-semibold">{category.name}</h1>
+          <Table key={category.id} trTitles={["Nombre", "Puntos"]}>
+            {category.consumptions.map((consumption) => (
+              <tr key={consumption.name}>
+                <td className="border-b border-gray-300 p-3">
+                  {consumption.name}
+                </td>
+                <td className="border-b border-gray-300 p-3">
+                  {consumption.points}
+                </td>
+                <td className="border-b border-gray-300 p-3">Editar</td>
+                <td className="border-b border-gray-300 p-3">Eliminar</td>
+              </tr>
+            ))}
+          </Table>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  console.log("SESSIONNNN", session);
+
+  let consumptionsByCategories;
+
+  if (session?.user.role === "Admin") {
+    try {
+      consumptionsByCategories = await prisma.consumptionCategory.findMany({
+        select: {
+          id: true,
+          name: true,
+          consumptions: {
+            select: {
+              name: true,
+              points: true,
+            },
+          },
+        },
+        orderBy: {
+          name: "asc",
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    return {
+      props: {
+        consumptionsByCategories,
+      },
+    };
+  }
+
+  return {
+    redirect: {
+      destination: "/",
+      permanent: false,
+    },
+  };
+};
