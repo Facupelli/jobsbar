@@ -13,15 +13,15 @@ export default function Nav({ route }: Props) {
   console.log(session);
 
   return (
-    <nav className="bg-gray-800 px-10 text-white">
-      <ul className="flex h-[70px] items-center gap-8">
+    <nav className="bg-zinc-900 px-10 text-white">
+      <ul className="flex h-[70px] items-center justify-end gap-8">
         {session && (
           <li className="cursor-pointer" onClick={async () => await signOut()}>
             SALIR
           </li>
         )}
 
-        <li className="ml-auto cursor-pointer">
+        <li className=" cursor-pointer">
           <Link href="/">INICIO</Link>
         </li>
 

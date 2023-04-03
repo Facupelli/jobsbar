@@ -21,8 +21,8 @@ const Home: NextPage = () => {
 
       <Nav />
 
-      <main className="">
-        <h1>JOBS</h1>
+      <main className="flex h-[calc(100vh_-_70px)] flex-col items-center justify-center">
+        <h1 className="text-6xl font-bold">JOBS</h1>
         <LoginInput />
       </main>
     </>
