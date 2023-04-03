@@ -2,11 +2,12 @@ import { useState } from "react";
 import Head from "next/head";
 import AdminLayout from "~/components/Admin/AdminLayout";
 import Nav from "~/components/Nav";
-import { GetServerSideProps } from "next";
-import { authOptions, getServerAuthSession } from "~/server/auth";
+import { type GetServerSideProps } from "next";
+import { authOptions } from "~/server/auth";
 import { getServerSession } from "next-auth";
 import { prisma } from "~/server/db";
 import Table from "~/components/Table";
+import type { Membership } from "~/types/model";
 
 type Props = {
   consumptionsByCategories: {
@@ -14,14 +15,20 @@ type Props = {
     id: string;
     name: string;
   }[];
+  allMemberships: Membership[];
 };
 
 export type Routes = "home" | "memberships" | "consumptions" | "promotions";
 
-export default function Admin({ consumptionsByCategories }: Props) {
+export default function Admin({
+  allMemberships,
+  consumptionsByCategories,
+}: Props) {
   const [route, setRoute] = useState<Routes>("home");
 
   const [consumptions, setConsumptions] = useState(consumptionsByCategories);
+  const [memberships, setMemberships] = useState(allMemberships);
+
   // const [drinks, setDrinks] = useState<SortedConsumption[]>(drinksList);
   // const [games, setGames] = useState<SortedConsumption[]>(gamesList);
   // const [promotions, setPromotions] =
@@ -42,12 +49,36 @@ export default function Admin({ consumptionsByCategories }: Props) {
 
       <main className="min-h-screen bg-gray-200">
         <AdminLayout route={route} setRoute={setRoute}>
+          {route === "memberships" && (
+            <Memberships memberships={allMemberships} />
+          )}
           {route === "consumptions" && (
             <Consumptions consumptions={consumptions} />
           )}
         </AdminLayout>
       </main>
     </div>
+  );
+}
+
+function Memberships({ memberships }: { memberships: Membership[] }) {
+  return (
+    <section>
+      <h1 className="p-3 text-lg font-semibold">Membresías</h1>
+      <Table trTitles={["Nombre", "Puntos Mínimos", "Puntos Máximos"]}>
+        {memberships.map((membership) => (
+          <tr key={membership.id}>
+            <td className="border-b border-gray-300 p-3">{membership.name}</td>
+            <td className="border-b border-gray-300 p-3">
+              {membership.minPoints}
+            </td>
+            <td className="border-b border-gray-300 p-3">
+              {membership.maxPoints}
+            </td>
+          </tr>
+        ))}
+      </Table>
+    </section>
   );
 }
 
@@ -90,9 +121,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   console.log("SESSIONNNN", session);
 
-  let consumptionsByCategories;
-
   if (session?.user.role === "Admin") {
+    let allMemberships, consumptionsByCategories;
+
     try {
       consumptionsByCategories = await prisma.consumptionCategory.findMany({
         select: {
@@ -109,12 +140,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           name: "asc",
         },
       });
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
+    }
+
+    try {
+      allMemberships = await prisma.membership.findMany({
+        orderBy: { minPoints: "asc" },
+      });
+    } catch (err) {
+      console.log(err);
     }
 
     return {
       props: {
+        allMemberships,
         consumptionsByCategories,
       },
     };

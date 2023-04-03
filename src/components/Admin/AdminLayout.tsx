@@ -47,7 +47,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
 
         <li
           className={`p-2 ${
-            route === "membership"
+            route === "memberships"
               ? "rounded bg-green-500  text-neutral-900"
               : null
           }`}

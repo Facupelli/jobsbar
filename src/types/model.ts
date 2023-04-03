@@ -12,3 +12,10 @@ export type User = {
 
   roles: Role[];
 };
+
+export type Membership = {
+  id: string;
+  name: string;
+  minPoints: number;
+  maxPoints: number;
+};
