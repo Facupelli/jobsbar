@@ -95,12 +95,12 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             route === "users" ? "rounded bg-green-500  text-neutral-900" : null
           }`}
         >
-          <Link href="/admin/users" className="">
+          <button onClick={() => setRoute("users")} className="">
             <div className="">
               {/* <UsersIcon size={22} active={route === "users"} /> */}
             </div>
             <p>Usuarios</p>
-          </Link>
+          </button>
         </li>
       </ul>
     </nav>
