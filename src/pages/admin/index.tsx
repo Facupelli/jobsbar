@@ -508,7 +508,9 @@ function CreatePromotion({
             <select
               className="rounded border border-neutral-600 p-1"
               multiple
-              {...register(`${category.name.toLowerCase()}Ids`)}
+              {...register(
+                `${category.name.toLowerCase()}Ids` as keyof CreatePromotion
+              )}
             >
               {category.consumptions.map((consumption) => (
                 <option key={consumption.id} value={consumption.id}>
