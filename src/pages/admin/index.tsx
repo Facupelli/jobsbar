@@ -1,41 +1,50 @@
-import { useState } from "react";
 import Head from "next/head";
+import { type GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
+import { useState } from "react";
+import { authOptions } from "~/server/auth";
+import { prisma } from "~/server/db";
+
 import AdminLayout from "~/components/Admin/AdminLayout";
 import Nav from "~/components/Nav";
-import { type GetServerSideProps } from "next";
-import { authOptions } from "~/server/auth";
-import { getServerSession } from "next-auth";
-import { prisma } from "~/server/db";
 import Table from "~/components/Table";
-import type { Membership } from "~/types/model";
+
+import type { Consumption, Membership, Promotion } from "~/types/model";
 
 type Props = {
-  consumptionsByCategories: {
+  allConsumptionsByCategories: {
     consumptions: { name: string; points: number }[];
     id: string;
     name: string;
   }[];
   allMemberships: Membership[];
+  allPromotions: Promotion[];
+  allConsumptions: Consumption[];
 };
 
 export type Routes = "home" | "memberships" | "consumptions" | "promotions";
 
 export default function Admin({
   allMemberships,
-  consumptionsByCategories,
+  allConsumptionsByCategories,
+  allPromotions,
+  allConsumptions,
 }: Props) {
   const [route, setRoute] = useState<Routes>("home");
 
-  const [consumptions, setConsumptions] = useState(consumptionsByCategories);
+  const [consumptionsByCategories, setConsumptionsByCategory] = useState(
+    allConsumptionsByCategories
+  );
   const [memberships, setMemberships] = useState(allMemberships);
+
+  const [consumptions, setConsumptions] = useState(allConsumptions);
+  const [promotions, setPromotions] = useState(allPromotions);
 
   // const [drinks, setDrinks] = useState<SortedConsumption[]>(drinksList);
   // const [games, setGames] = useState<SortedConsumption[]>(gamesList);
   // const [promotions, setPromotions] =
   //   useState<SortedPromotion[]>(promotionsList);
   // const [users, setUsers] = useState<User[]>(usersList);
-
-  console.log(consumptionsByCategories);
 
   return (
     <div className="">
@@ -49,11 +58,12 @@ export default function Admin({
 
       <main className="min-h-screen bg-gray-200">
         <AdminLayout route={route} setRoute={setRoute}>
-          {route === "memberships" && (
-            <Memberships memberships={allMemberships} />
-          )}
+          {route === "memberships" && <Memberships memberships={memberships} />}
           {route === "consumptions" && (
-            <Consumptions consumptions={consumptions} />
+            <Consumptions consumptions={consumptionsByCategories} />
+          )}
+          {route === "promotions" && (
+            <Promotions consumptions={consumptions} promotions={promotions} />
           )}
         </AdminLayout>
       </main>
@@ -75,6 +85,8 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
             <td className="border-b border-gray-300 p-3">
               {membership.maxPoints}
             </td>
+            <td className="border-b border-gray-300 p-3">Editar</td>
+            <td className="border-b border-gray-300 p-3">Eliminar</td>
           </tr>
         ))}
       </Table>
@@ -94,7 +106,7 @@ function Consumptions({
   return (
     <section className="grid gap-10">
       {consumptions.map((category) => (
-        <div>
+        <div key={category.id}>
           <h1 className="p-3 text-lg font-semibold">{category.name}</h1>
           <Table key={category.id} trTitles={["Nombre", "Puntos"]}>
             {category.consumptions.map((consumption) => (
@@ -116,16 +128,85 @@ function Consumptions({
   );
 }
 
+function Promotions({
+  consumptions,
+  promotions,
+}: {
+  consumptions: Consumption[];
+  promotions: Promotion[];
+}) {
+  return (
+    <section>
+      <Table
+        trTitles={[
+          "Nombre",
+          "Membresía",
+          "Bebidas",
+          "Comidas",
+          "Juegos",
+          "Descuento",
+          "Puntos",
+        ]}
+      >
+        {promotions.map((promo) => (
+          <tr key={promo.id}>
+            <td className="border-b border-gray-300 p-3">{promo.name}</td>
+            <td className="border-b border-gray-300 p-3">
+              {promo.memberships
+                ?.map((membership) => membership.name)
+                .join(", ")}
+            </td>
+            <td className="border-b border-gray-300 p-3">
+              {promo.consumptions
+                ?.filter(
+                  (consumption) =>
+                    consumption.consumption.consumptionCategory.name ===
+                    "Bebida"
+                )
+                .map((consumption) => consumption.consumption.name)
+                .join(", ")}
+            </td>
+            <td className="border-b border-gray-300 p-3">
+              {promo.consumptions
+                ?.filter(
+                  (consumption) =>
+                    consumption.consumption?.consumptionCategory.name ===
+                    "Comida"
+                )
+                .map((consumption) => consumption.consumption.name)
+                .join(", ")}
+            </td>
+            <td className="border-b border-gray-300 p-3">
+              {promo.consumptions
+                ?.filter(
+                  (consumption) =>
+                    consumption.consumption?.consumptionCategory.name ===
+                    "Juego"
+                )
+                .map((consumption) => consumption.consumption.name)
+                .join(", ")}
+            </td>
+            <td className="border-b border-gray-300 p-3">{promo.discount}%</td>
+            <td className="border-b border-gray-300 p-3">{promo.points}</td>
+            <td className="border-b border-gray-300 p-3">Eliminar</td>
+          </tr>
+        ))}
+      </Table>
+    </section>
+  );
+}
+
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
 
-  console.log("SESSIONNNN", session);
-
   if (session?.user.role === "Admin") {
-    let allMemberships, consumptionsByCategories;
+    let allMemberships,
+      allConsumptionsByCategories,
+      allPromotions,
+      allConsumptions;
 
     try {
-      consumptionsByCategories = await prisma.consumptionCategory.findMany({
+      allConsumptionsByCategories = await prisma.consumptionCategory.findMany({
         select: {
           id: true,
           name: true,
@@ -152,10 +233,40 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       console.log(err);
     }
 
+    try {
+      allPromotions = await prisma.promotion.findMany({
+        select: {
+          name: true,
+          id: true,
+          discount: true,
+          points: true,
+          memberships: { select: { name: true } },
+          consumptions: {
+            select: {
+              consumption: {
+                select: {
+                  name: true,
+                  consumptionCategory: { select: { name: true } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      allConsumptions = await prisma.consumptionCategory.findMany({
+        select: { consumptions: { select: { name: true } } },
+      });
+    } catch (err) {
+      console.log(err);
+    }
+
     return {
       props: {
         allMemberships,
-        consumptionsByCategories,
+        allConsumptionsByCategories,
+        allPromotions,
+        allConsumptions,
       },
     };
   }

@@ -82,12 +82,12 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
               : null
           }`}
         >
-          <Link href="/admin/promotion" className="">
+          <button onClick={() => setRoute("promotions")} className="">
             <div className="">
               {/* <PercentageIcon size={22} active={route === "promotions"} /> */}
             </div>
             <p>Promociones</p>
-          </Link>
+          </button>
         </li>
 
         <li

@@ -5,7 +5,7 @@ type Props = {
 
 export default function Table({ trTitles = [], children }: Props) {
   return (
-    <table className="w-full border-collapse overflow-hidden rounded-md bg-gray-100 shadow-md">
+    <table className="w-full border-collapse overflow-hidden rounded-md bg-gray-100 text-xs shadow-md">
       <thead className="border-b border-gray-300  text-[12px] font-light text-gray-800">
         <tr className="rounded font-semibold">
           {trTitles.length > 0 &&
