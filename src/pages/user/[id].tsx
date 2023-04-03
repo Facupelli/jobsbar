@@ -49,6 +49,8 @@ const UserDetail: NextPage<Props> = ({ id }) => {
     (consumption) => consumption.name === consumptionActive
   );
 
+  const validPromotions = user.data.membership?.promotions;
+
   return (
     <div className="">
       <Head>
@@ -89,12 +91,39 @@ const UserDetail: NextPage<Props> = ({ id }) => {
             </section>
           </section>
 
-          {selectedConsumption && (
+          {consumptionActive !== "Promociones" && selectedConsumption && (
             <section className="rounded-sm bg-white p-4">
               <ConsumptionsList
                 selectedConsumption={selectedConsumption}
                 userId={id}
               />
+            </section>
+          )}
+
+          {consumptionActive === "Promociones" && (
+            <section className="rounded-sm bg-white p-4">
+              <div className="flex gap-4">
+                {validPromotions?.map((promo) => (
+                  <div
+                    key={promo.id}
+                    className="flex items-center gap-10 rounded bg-neutral-300 p-2 text-sm"
+                  >
+                    <div className="">
+                      <p>
+                        <strong className="font-semibold">{promo.name}</strong>
+                      </p>
+                      <p>Descuento: {promo.discount}%</p>
+                      <p className="text-base">-{promo.points} pts</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
+                    >
+                      Cargar
+                    </button>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
 
@@ -141,6 +170,16 @@ function ConsumptionButtons({
           </p>
         </button>
       ))}
+      <button
+        className={`${
+          consumptionActive === "Promociones"
+            ? "text-netrual-900 bg-green-500"
+            : "bg-neutral-900 text-neutral-100"
+        } col-span-1 flex items-center justify-center rounded-sm  font-semibold `}
+        onClick={() => setConsumptionActive("Promociones")}
+      >
+        <p>4. Promociones</p>
+      </button>
     </>
   );
 }

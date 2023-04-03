@@ -10,6 +10,8 @@ export type User = {
   emailVerified: Date | null;
   image: string | null;
 
+  consumptions?: ConsumptionOnUser[];
+  promotions?: PromotionOnUser[];
   totalPoints: number;
   totalPointsSpent: number;
   roles?: Role[];
@@ -64,9 +66,9 @@ export type Membership = {
 export type Promotion = {
   id: string;
   name: string;
-  memberships: Membership[];
-  consumptions: ConsumptionOnPromotion[];
-  users: PromotionOnUser[];
+  memberships?: Membership[];
+  consumptions?: ConsumptionOnPromotion[];
+  users?: PromotionOnUser[];
   points: number;
   discount: number;
 };
@@ -82,9 +84,9 @@ export type SortedPromotion = {
 };
 
 export type ConsumptionOnPromotion = {
-  consumption: Consumption;
+  consumption?: Consumption;
   consumptionId: string;
-  promotion: Promotion;
+  promotion?: Promotion;
   promotionId: string;
   quantity: number;
   createdAt: Date;

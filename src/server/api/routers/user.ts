@@ -37,7 +37,9 @@ export const userRouter = createTRPCRouter({
         const user = await prisma.user.findUnique({
           where: { id: input.id },
           include: {
-            membership: true,
+            membership: {
+              include: { promotions: { include: { consumptions: true } } },
+            },
             consumptions: { include: { consumption: true } },
           },
         });
