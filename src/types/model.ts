@@ -10,7 +10,9 @@ export type User = {
   emailVerified: Date | null;
   image: string | null;
 
-  roles: Role[];
+  totalPoints: number;
+  totalPointsSpent: number;
+  roles?: Role[];
 };
 
 export type ConsumptionCategory = {
@@ -22,11 +24,11 @@ export type ConsumptionCategory = {
 export type Consumption = {
   id: string;
   name: string;
-  consumptionCategory: ConsumptionCategory;
+  consumptionCategory?: ConsumptionCategory;
   consumptionCategoryId: string;
   points: number;
-  users: ConsumptionOnUser[];
-  promotions: ConsumptionOnPromotion[];
+  users?: ConsumptionOnUser[];
+  promotions?: ConsumptionOnPromotion[];
 };
 
 export type SortedConsumption = {
@@ -41,9 +43,9 @@ export type SortedConsumption = {
 
 export type ConsumptionOnUser = {
   id: string;
-  user: User;
+  user?: User;
   userId: string;
-  consumption: Consumption;
+  consumption?: Consumption;
   consumptionId: string;
   quantity: number;
   winner: boolean | null;
@@ -54,9 +56,9 @@ export type Membership = {
   id: string;
   name: string;
   minPoints: number;
-  maxPoints: number;
-  users: User[];
-  promotions: Promotion[];
+  maxPoints: number | null;
+  users?: User[];
+  promotions?: Promotion[];
 };
 
 export type Promotion = {

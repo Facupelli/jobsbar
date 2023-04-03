@@ -16,13 +16,10 @@ import {
 } from "~/utils/admin";
 
 import type { Consumption, Membership, Promotion, User } from "~/types/model";
+import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
 
 type Props = {
-  allConsumptionsByCategories: {
-    consumptions: { name: string; points: number }[];
-    id: string;
-    name: string;
-  }[];
+  allConsumptionsByCategories: ConsumptionsGrouped[];
   allMemberships: Membership[];
   allPromotions: Promotion[];
   allConsumptions: Consumption[];
@@ -118,11 +115,7 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
 function Consumptions({
   consumptions,
 }: {
-  consumptions: {
-    consumptions: { name: string; points: number }[];
-    id: string;
-    name: string;
-  }[];
+  consumptions: ConsumptionsGrouped[];
 }) {
   return (
     <section className="grid gap-10">
@@ -183,7 +176,7 @@ function Promotions({
               {promo.consumptions
                 ?.filter(
                   (consumption) =>
-                    consumption.consumption.consumptionCategory.name ===
+                    consumption.consumption.consumptionCategory?.name ===
                     "Bebida"
                 )
                 .map((consumption) => consumption.consumption.name)
@@ -193,7 +186,7 @@ function Promotions({
               {promo.consumptions
                 ?.filter(
                   (consumption) =>
-                    consumption.consumption?.consumptionCategory.name ===
+                    consumption.consumption?.consumptionCategory?.name ===
                     "Comida"
                 )
                 .map((consumption) => consumption.consumption.name)
@@ -203,7 +196,7 @@ function Promotions({
               {promo.consumptions
                 ?.filter(
                   (consumption) =>
-                    consumption.consumption?.consumptionCategory.name ===
+                    consumption.consumption?.consumptionCategory?.name ===
                     "Juego"
                 )
                 .map((consumption) => consumption.consumption.name)

@@ -57,11 +57,6 @@ function LoginInput() {
         { id },
         {
           onSuccess: (data) => {
-            if (!data?.success && data?.message) {
-              setError(data?.message);
-              setValue("id", "");
-            }
-
             if (data?.success) {
               router.push(`/user/${id}`);
             }

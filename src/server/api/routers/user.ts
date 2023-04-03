@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
@@ -16,10 +17,38 @@ export const userRouter = createTRPCRouter({
           where: { id: input.id },
         });
 
-        if (user) {
-          return { success: true, user };
+        if (!user) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "User not found",
+          });
         }
-        return { success: false, message: "user not found" };
+        return { success: true, user };
+      } catch (err) {
+        console.log(err);
+      }
+    }),
+
+  getUser: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: input.id },
+          include: {
+            membership: true,
+            consumptions: { include: { consumption: true } },
+          },
+        });
+
+        if (!user) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "User not found",
+          });
+        }
+
+        return user;
       } catch (err) {
         console.log(err);
       }

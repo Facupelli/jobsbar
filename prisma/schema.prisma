@@ -52,9 +52,11 @@ model User {
     accounts          Account[]
     sessions          Session[]
 
+    totalPoints       Int                    @default(0)
+    totalPointsSpent  Int                    @default(0)
     role              Role?                  @relation(fields: [roleId], references: [id])
     roleId            String?
-    membership        Membership?           @relation(fields: [membershipId], references: [id])
+    membership        Membership?            @relation(fields: [membershipId], references: [id])
     membershipId      String?
     consumptions      ConsumptionOnUser[]
     promotions        PromotionOnUser[]
