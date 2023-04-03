@@ -20,8 +20,10 @@ import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
 import type { Membership, User } from "~/types/model";
 import type {
   Active,
+  AdminPromotion,
   CreateConsumption,
   CreateMembership,
+  CreatePromotion,
   CreateUser,
 } from "~/types/admin";
 
@@ -70,8 +72,9 @@ export default function Admin() {
           )}
           {route === "promotions" && (
             <Promotions
-              // consumptions={consumptions}
+              consumptions={consumptionsByCategories.data}
               promotions={promotions.data}
+              memberships={memberships.data}
             />
           )}
           {route === "users" && (
@@ -338,88 +341,210 @@ function CreateConsumption({
 }
 
 function Promotions({
-  // consumptions,
+  consumptions,
   promotions,
+  memberships,
 }: {
-  // consumptions: Consumption[];
-  promotions: {
-    id: string;
-    consumptions: {
-      consumption: {
-        consumptionCategory: {
-          name: string;
-        };
-        name: string;
-      };
-    }[];
-    name: string;
-    points: number;
-    memberships: {
-      name: string;
-    }[];
-    discount: number;
-  }[];
+  consumptions: ConsumptionsGrouped[];
+  promotions: AdminPromotion[];
+  memberships: Membership[];
 }) {
-  return (
-    <section>
-      <h1 className="p-3 text-lg font-semibold">Promociones</h1>
+  const [showModal, setShowModal] = useState(false);
 
-      <Table
-        trTitles={[
-          "Nombre",
-          "Membresía",
-          "Bebidas",
-          "Comidas",
-          "Juegos",
-          "Descuento",
-          "Puntos",
-        ]}
-      >
-        {promotions.map((promo) => (
-          <tr key={promo.id}>
-            <td className="border-b border-gray-300 p-3">{promo.name}</td>
-            <td className="border-b border-gray-300 p-3">
-              {promo.memberships
-                ?.map((membership) => membership.name)
-                .join(", ")}
-            </td>
-            <td className="border-b border-gray-300 p-3">
-              {promo.consumptions
-                ?.filter(
-                  (consumption) =>
-                    consumption.consumption?.consumptionCategory?.name ===
-                    "Bebida"
-                )
-                .map((consumption) => consumption.consumption?.name)
-                .join(", ")}
-            </td>
-            <td className="border-b border-gray-300 p-3">
-              {promo.consumptions
-                ?.filter(
-                  (consumption) =>
-                    consumption.consumption?.consumptionCategory?.name ===
-                    "Comida"
-                )
-                .map((consumption) => consumption.consumption?.name)
-                .join(", ")}
-            </td>
-            <td className="border-b border-gray-300 p-3">
-              {promo.consumptions
-                ?.filter(
-                  (consumption) =>
-                    consumption.consumption?.consumptionCategory?.name ===
-                    "Juego"
-                )
-                .map((consumption) => consumption.consumption?.name)
-                .join(", ")}
-            </td>
-            <td className="border-b border-gray-300 p-3">{promo.discount}%</td>
-            <td className="border-b border-gray-300 p-3">{promo.points}</td>
-            <td className="border-b border-gray-300 p-3">Eliminar</td>
-          </tr>
+  return (
+    <>
+      {showModal && (
+        <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
+          <CreatePromotion
+            setShowModal={setShowModal}
+            consumptions={consumptions}
+            memberships={memberships}
+          />
+        </Modal>
+      )}
+      <section>
+        <div className="flex items-center justify-between pb-6">
+          <h1 className="p-3 text-lg font-semibold">Promociones</h1>
+          <button
+            type="button"
+            onClick={() => setShowModal(true)}
+            className="rounded bg-green-500 p-2 text-neutral-100"
+          >
+            Crear promoción
+          </button>
+        </div>
+
+        <Table
+          trTitles={[
+            "Nombre",
+            "Membresía",
+            "Bebidas",
+            "Comidas",
+            "Juegos",
+            "Descuento",
+            "Puntos",
+          ]}
+        >
+          {promotions.map((promo) => (
+            <tr key={promo.id}>
+              <td className="border-b border-gray-300 p-3">{promo.name}</td>
+              <td className="border-b border-gray-300 p-3">
+                {promo.memberships
+                  ?.map((membership) => membership.name)
+                  .join(", ")}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {promo.consumptions
+                  ?.filter(
+                    (consumption) =>
+                      consumption.consumption?.consumptionCategory?.name ===
+                      "Bebida"
+                  )
+                  .map((consumption) => consumption.consumption?.name)
+                  .join(", ")}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {promo.consumptions
+                  ?.filter(
+                    (consumption) =>
+                      consumption.consumption?.consumptionCategory?.name ===
+                      "Comida"
+                  )
+                  .map((consumption) => consumption.consumption?.name)
+                  .join(", ")}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {promo.consumptions
+                  ?.filter(
+                    (consumption) =>
+                      consumption.consumption?.consumptionCategory?.name ===
+                      "Juego"
+                  )
+                  .map((consumption) => consumption.consumption?.name)
+                  .join(", ")}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {promo.discount}%
+              </td>
+              <td className="border-b border-gray-300 p-3">{promo.points}</td>
+              <td className="border-b border-gray-300 p-3">Eliminar</td>
+            </tr>
+          ))}
+        </Table>
+      </section>
+    </>
+  );
+}
+
+function CreatePromotion({
+  setShowModal,
+  consumptions,
+  memberships,
+}: {
+  setShowModal: Dispatch<SetStateAction<boolean>>;
+  consumptions: ConsumptionsGrouped[];
+  memberships: Membership[];
+}) {
+  const { register, handleSubmit } = useForm<CreatePromotion>();
+  const ctx = api.useContext();
+  const { mutate } = api.admin.createPromotion.useMutation();
+
+  const onSubmit = (data: CreatePromotion) => {
+    console.log(data);
+    mutate(
+      {
+        name: data.name,
+        membershipsIds: data.membershipsIds,
+        consumptionsIds: [
+          ...data.bebidaIds,
+          ...data.juegoIds,
+          ...data.comidaIds,
+        ],
+        points: data.points,
+        discount: data.discount,
+        quantity: 1,
+      },
+      {
+        onSuccess: () => {
+          setShowModal(false);
+          ctx.user.getAllUsers.invalidate();
+        },
+      }
+    );
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      <h4>CREAR PROMOCIÓN</h4>
+
+      <div className="grid gap-1">
+        <label>Nombre:</label>
+        <input
+          className="rounded border border-neutral-600 p-1"
+          type="text"
+          {...register("name")}
+        />
+      </div>
+
+      <div className="grid gap-1">
+        <label>Membresias:</label>
+        <select
+          className="rounded border border-neutral-600 p-1"
+          multiple
+          {...register("membershipsIds")}
+        >
+          {memberships?.map((membership) => (
+            <option key={membership.id} value={membership.id}>
+              {membership.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        {consumptions.map((category) => (
+          <div key={category.id} className="grid gap-1">
+            <label>{category.name}:</label>
+            <select
+              className="rounded border border-neutral-600 p-1"
+              multiple
+              {...register(`${category.name.toLowerCase()}Ids`)}
+            >
+              {category.consumptions.map((consumption) => (
+                <option key={consumption.id} value={consumption.id}>
+                  {consumption.name}
+                </option>
+              ))}
+            </select>
+          </div>
         ))}
-      </Table>
-    </section>
+      </div>
+
+      <div className="grid gap-1">
+        <label>Descuento (%):</label>
+        <input
+          className="rounded border border-neutral-600 p-1"
+          type="text"
+          {...register("discount", { valueAsNumber: true })}
+        />
+      </div>
+
+      <div className="grid gap-1">
+        <label>Puntos:</label>
+        <input
+          className="rounded border border-neutral-600 p-1"
+          type="text"
+          {...register("points", { valueAsNumber: true })}
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="rounded-sm bg-green-500 p-1 font-semibold text-neutral-100"
+      >
+        CREAR
+      </button>
+    </form>
   );
 }
 

@@ -15,3 +15,31 @@ export type CreateMembership = {
 };
 
 export type Active = "Comida" | "Bebida" | "Juego";
+
+export type CreatePromotion = {
+  name: string;
+  membershipsIds: string[];
+  juegoIds: string[];
+  bebidaIds: string[];
+  comidaIds: string[];
+  points: number;
+  discount: number;
+};
+
+export type AdminPromotion = {
+  id: string;
+  consumptions: {
+    consumption: {
+      consumptionCategory: {
+        name: string;
+      };
+      name: string;
+    };
+  }[];
+  name: string;
+  points: number;
+  memberships: {
+    name: string;
+  }[];
+  discount: number;
+};

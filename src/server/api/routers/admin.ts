@@ -72,4 +72,38 @@ export const adminRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  createPromotion: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        membershipsIds: z.string().array(),
+        discount: z.number(),
+        points: z.number(),
+        consumptionsIds: z.string().array(),
+        quantity: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const newPromotion = await prisma.promotion.create({
+        data: {
+          name: input.name,
+          memberships: { connect: input.membershipsIds.map((id) => ({ id })) },
+          points: Number(input.points),
+          discount: Number(input.discount),
+        },
+      });
+
+      await prisma.$transaction(
+        input.consumptionsIds.map((consumptionId: string) =>
+          prisma.consumptionOnPromotion.create({
+            data: {
+              promotion: { connect: { id: newPromotion.id } },
+              consumption: { connect: { id: consumptionId } },
+              quantity: Number(input.quantity),
+            },
+          })
+        )
+      );
+    }),
 });
