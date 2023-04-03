@@ -1,8 +1,6 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 
-import s from "./Nav.module.scss";
-
 type Props = {
   route?: string;
 };
@@ -10,10 +8,12 @@ type Props = {
 export default function Nav({ route }: Props) {
   const { data: session } = useSession();
 
-  console.log(session);
-
   return (
-    <nav className="bg-zinc-900 px-10 text-white">
+    <nav
+      className={`bg-neutral-900 px-10 font-medium text-white shadow-md ${
+        route === "admin" ? "fixed h-[70px] w-full " : "relative"
+      }`}
+    >
       <ul className="flex h-[70px] items-center justify-end gap-8">
         {session && (
           <li className="cursor-pointer" onClick={async () => await signOut()}>
@@ -28,12 +28,12 @@ export default function Nav({ route }: Props) {
         <li className="cursor-pointer">
           <Link href="/ranking">RANKINGS</Link>
         </li>
-        {/* 
-        {session?.user.role === "ADMIN" && (
+
+        {session?.user.role === "Admin" && (
           <li>
             <Link href="/admin">ADMIN</Link>
           </li>
-        )} */}
+        )}
 
         {!session && (
           <li

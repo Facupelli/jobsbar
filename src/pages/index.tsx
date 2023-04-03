@@ -1,14 +1,11 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
 
 import { api } from "~/utils/api";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import axios from "axios";
-import Nav from "~/components/Nav/Nav";
+import Nav from "~/components/Nav";
 
 const Home: NextPage = () => {
   return (
