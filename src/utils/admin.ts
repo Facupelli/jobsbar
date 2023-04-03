@@ -9,6 +9,7 @@ export const fetchAllConsumptionsByCategories = async () => {
         select: {
           name: true,
           points: true,
+          id: true,
         },
       },
     },

@@ -1,5 +1,5 @@
 export type ConsumptionsGrouped = {
-  consumptions: { name: string; points: number }[];
+  consumptions: { name: string; points: number; id: string }[];
   id: string;
   name: string;
 };

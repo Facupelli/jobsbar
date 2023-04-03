@@ -91,7 +91,10 @@ const UserDetail: NextPage<Props> = ({ id }) => {
 
           {selectedConsumption && (
             <section className="rounded-sm bg-white p-4">
-              <ConsumptionsList selectedConsumption={selectedConsumption} />
+              <ConsumptionsList
+                selectedConsumption={selectedConsumption}
+                userId={id}
+              />
             </section>
           )}
 
@@ -176,9 +179,30 @@ function MembershipCard({
 
 function ConsumptionsList({
   selectedConsumption,
+  userId,
 }: {
   selectedConsumption: ConsumptionsGrouped;
+  userId: string;
 }) {
+  const ctx = api.useContext();
+  const { mutate, isLoading } = api.user.postConsumption.useMutation();
+
+  const handlePostConsumption = (
+    userId: string,
+    consumptionId: string,
+    points: number
+  ) => {
+    mutate(
+      { userId, consumptionId, points, quantity: 1 },
+      {
+        onSuccess: () => {
+          ctx.user.getUserConsumptionsGrouped.invalidate();
+          ctx.user.getUser.invalidate();
+        },
+      }
+    );
+  };
+
   return (
     <div className="flex gap-4">
       {selectedConsumption.consumptions.map((consumption) => (
@@ -193,6 +217,9 @@ function ConsumptionsList({
             <p className="text-sm">{consumption.points} pts</p>
           </div>
           <button
+            onClick={() =>
+              handlePostConsumption(userId, consumption.id, consumption.points)
+            }
             type="button"
             className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
           >
@@ -213,31 +240,34 @@ function LastConsumptions({
     <details className="rounded-sm bg-white p-4">
       <summary className="cursor-pointer pb-4">Últimas consumiciones:</summary>
       <Table trTitles={["consumición", "ganó?", "cantidad", "fecha"]}>
-        {userConsumptions.slice(0, 10).map((consumption) => (
-          <tr key={consumption.id}>
-            <td className="border-b border-gray-300 p-3">
-              {consumption.consumption?.name}
-            </td>
-            <td className="border-b border-gray-300 p-3">
-              {consumption.consumption?.name}
-            </td>
-            <td className="border-b border-gray-300 p-3">
-              {consumption.quantity}
-            </td>
-            <td className="border-b border-gray-300 p-3">
-              {new Date(consumption.createdAt).toLocaleDateString("es-AR", {
-                year: "numeric",
-                day: "numeric",
-                month: "short",
-              })}
-              {" - "}
-              {new Date(consumption.createdAt).toLocaleTimeString("es-AR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </td>
-          </tr>
-        ))}
+        {userConsumptions
+          .slice(0, 10)
+          .reverse()
+          .map((consumption) => (
+            <tr key={consumption.id}>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.consumption?.name}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.consumption?.name}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.quantity}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {new Date(consumption.createdAt).toLocaleDateString("es-AR", {
+                  year: "numeric",
+                  day: "numeric",
+                  month: "short",
+                })}
+                {" - "}
+                {new Date(consumption.createdAt).toLocaleTimeString("es-AR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </td>
+            </tr>
+          ))}
       </Table>
     </details>
   );

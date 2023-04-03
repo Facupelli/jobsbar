@@ -82,4 +82,45 @@ export const userRouter = createTRPCRouter({
         console.log(err);
       }
     }),
+
+  postConsumption: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        consumptionId: z.string(),
+        points: z.number(),
+        quantity: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const userToUpdate = await prisma.user.findUnique({
+        where: { id: input.userId },
+      });
+
+      if (!userToUpdate) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      await prisma.consumptionOnUser.create({
+        data: {
+          user: { connect: { id: input.userId } },
+          consumption: { connect: { id: input.consumptionId } },
+          quantity: Number(input.quantity),
+        },
+      });
+
+      await prisma.user.update({
+        where: { id: input.userId },
+        data: {
+          totalPoints: {
+            increment: Number(input.points),
+          },
+        },
+      });
+
+      return { success: true };
+    }),
 });
