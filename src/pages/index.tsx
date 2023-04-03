@@ -54,6 +54,11 @@ function LoginInput() {
         { id },
         {
           onSuccess: (data) => {
+            if (!data?.success && data?.message) {
+              setError(data?.message);
+              setValue("id", "");
+            }
+
             console.log(data);
             if (data?.success) {
               router.push(`/user/${id}`);
@@ -62,6 +67,7 @@ function LoginInput() {
           },
           onError: (err) => {
             console.log("catch", err);
+            setError(err.message);
             setValue("id", "");
           },
         }
