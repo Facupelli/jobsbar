@@ -85,7 +85,7 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  postConsumption: publicProcedure
+  postConsumptionOnUser: publicProcedure
     .input(
       z.object({
         userId: z.string(),

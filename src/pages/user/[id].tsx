@@ -10,7 +10,7 @@ import Nav from "~/components/Nav";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
-import type { User } from "~/types/model";
+import type { Promotion, User } from "~/types/model";
 import { Membership } from "~/types/model";
 import { ConsumptionOnUser } from "~/types/model";
 import {
@@ -102,28 +102,7 @@ const UserDetail: NextPage<Props> = ({ id }) => {
 
           {consumptionActive === "Promociones" && (
             <section className="rounded-sm bg-white p-4">
-              <div className="flex gap-4">
-                {validPromotions?.map((promo) => (
-                  <div
-                    key={promo.id}
-                    className="flex items-center gap-10 rounded bg-neutral-300 p-2 text-sm"
-                  >
-                    <div className="">
-                      <p>
-                        <strong className="font-semibold">{promo.name}</strong>
-                      </p>
-                      <p>Descuento: {promo.discount}%</p>
-                      <p className="text-base">-{promo.points} pts</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
-                    >
-                      Cargar
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <PromotionsList validPromotions={validPromotions} userId={id} />
             </section>
           )}
 
@@ -224,7 +203,7 @@ function ConsumptionsList({
   userId: string;
 }) {
   const ctx = api.useContext();
-  const { mutate, isLoading } = api.user.postConsumption.useMutation();
+  const { mutate, isLoading } = api.user.postConsumptionOnUser.useMutation();
 
   const handlePostConsumption = (
     userId: string,
@@ -260,6 +239,61 @@ function ConsumptionsList({
               handlePostConsumption(userId, consumption.id, consumption.points)
             }
             type="button"
+            className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
+          >
+            Cargar
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PromotionsList({
+  validPromotions,
+  userId,
+}: {
+  validPromotions: Promotion[] | undefined;
+  userId: string;
+}) {
+  const ctx = api.useContext();
+  const { mutate } = api.promotions.postPromotionOnUser.useMutation();
+
+  const handlePostPromotion = (
+    userId: string,
+    promotionId: string,
+    points: number
+  ) => {
+    mutate(
+      { userId, promotionId, points, quantity: 1 },
+      {
+        onSuccess: () => {
+          ctx.user.getUser.invalidate();
+        },
+      }
+    );
+  };
+
+  if (!validPromotions || validPromotions.length === 0)
+    return <div>Actualemte no hay promociones para tu membresía.</div>;
+
+  return (
+    <div className="flex gap-4">
+      {validPromotions?.map((promo) => (
+        <div
+          key={promo.id}
+          className="flex items-center gap-10 rounded bg-neutral-300 p-2 text-sm"
+        >
+          <div className="">
+            <p>
+              <strong className="font-semibold">{promo.name}</strong>
+            </p>
+            <p>Descuento: {promo.discount}%</p>
+            <p className="text-base">-{promo.points} pts</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => handlePostPromotion(userId, promo.id, promo.points)}
             className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
           >
             Cargar
