@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import superjason from "superjson";
 import { type GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -20,6 +21,8 @@ import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
 import Modal from "~/components/Modal";
 import { useForm } from "react-hook-form";
 import { api } from "~/utils/api";
+import { createProxySSGHelpers } from "@trpc/react-query/ssg";
+import { appRouter } from "~/server/api/root";
 
 type Props = {
   allConsumptionsByCategories: ConsumptionsGrouped[];
@@ -45,26 +48,22 @@ export default function Admin({
   allUsers,
   usersCount,
 }: Props) {
+  const memberships = api.membership.getAllMemberships.useQuery();
+  const users = api.user.getAllUsers.useQuery();
+  const promotions = api.promotions.getAllPromotions.useQuery();
+  const consumptionsByCategories =
+    api.consumptions.getConsumptionsGrouped.useQuery();
+
   const [route, setRoute] = useState<Routes>("home");
 
-  const [consumptionsByCategories, setConsumptionsByCategory] = useState(
-    allConsumptionsByCategories
-  );
-  const [memberships, setMemberships] = useState(allMemberships);
-
-  //PROMOTIONS
-  const [consumptions, setConsumptions] = useState(allConsumptions);
-  const [promotions, setPromotions] = useState(allPromotions);
-
-  //USERS
-  const [users, setUsers] = useState(allUsers);
-  const [totalUsers, setTotalUsers] = useState(usersCount);
-
-  // const [drinks, setDrinks] = useState<SortedConsumption[]>(drinksList);
-  // const [games, setGames] = useState<SortedConsumption[]>(gamesList);
-  // const [promotions, setPromotions] =
-  //   useState<SortedPromotion[]>(promotionsList);
-  // const [users, setUsers] = useState<User[]>(usersList);
+  if (
+    !memberships.data ||
+    !users.data ||
+    !promotions.data ||
+    !consumptionsByCategories.data
+  ) {
+    return <div>404</div>;
+  }
 
   return (
     <div className="">
@@ -78,14 +77,24 @@ export default function Admin({
 
       <main className="min-h-screen bg-gray-200">
         <AdminLayout route={route} setRoute={setRoute}>
-          {route === "memberships" && <Memberships memberships={memberships} />}
+          {route === "memberships" && (
+            <Memberships memberships={memberships.data} />
+          )}
           {route === "consumptions" && (
-            <Consumptions consumptions={consumptionsByCategories} />
+            <Consumptions consumptions={consumptionsByCategories.data} />
           )}
           {route === "promotions" && (
-            <Promotions consumptions={consumptions} promotions={promotions} />
+            <Promotions
+              // consumptions={consumptions}
+              promotions={promotions.data}
+            />
           )}
-          {route === "users" && <Users users={users} totalUsers={totalUsers} />}
+          {route === "users" && (
+            <Users
+              users={users.data?.allUsers}
+              totalUsers={users.data?.usersCount}
+            />
+          )}
         </AdminLayout>
       </main>
     </div>
@@ -145,6 +154,7 @@ function CreateMembership({
 }: {
   setShowModal: Dispatch<SetStateAction<boolean>>;
 }) {
+  const ctx = api.useContext();
   const { register, handleSubmit } = useForm<MembershipData>();
   const { mutate } = api.admin.postMembership.useMutation();
 
@@ -152,6 +162,7 @@ function CreateMembership({
     mutate(data, {
       onSuccess: () => {
         setShowModal(false);
+        ctx.membership.getAllMemberships.invalidate();
       },
     });
   };
@@ -256,11 +267,27 @@ function Consumptions({
 }
 
 function Promotions({
-  consumptions,
+  // consumptions,
   promotions,
 }: {
-  consumptions: Consumption[];
-  promotions: Promotion[];
+  // consumptions: Consumption[];
+  promotions: {
+    id: string;
+    consumptions: {
+      consumption: {
+        consumptionCategory: {
+          name: string;
+        };
+        name: string;
+      };
+    }[];
+    name: string;
+    points: number;
+    memberships: {
+      name: string;
+    }[];
+    discount: number;
+  }[];
 }) {
   return (
     <section>
@@ -348,56 +375,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions);
 
   if (session?.user.role === "Admin") {
-    let allMemberships,
-      allConsumptionsByCategories,
-      allPromotions,
-      allConsumptions,
-      allUsers,
-      usersCount;
+    const ssg = createProxySSGHelpers({
+      router: appRouter,
+      ctx: { prisma, session: null },
+      transformer: superjason,
+    });
 
-    try {
-      allConsumptionsByCategories = await fetchAllConsumptionsByCategories();
-    } catch (err) {
-      console.error(err);
-    }
-
-    try {
-      allMemberships = await prisma.membership.findMany({
-        orderBy: { minPoints: "asc" },
-      });
-    } catch (err) {
-      console.log(err);
-    }
-
-    try {
-      allPromotions = await fetchAllPromotions();
-
-      allConsumptions = await prisma.consumptionCategory.findMany({
-        select: { consumptions: { select: { name: true } } },
-      });
-    } catch (err) {
-      console.log(err);
-    }
-
-    try {
-      allUsers = await prisma.user.findMany({
-        skip: 0,
-        take: 20,
-      });
-
-      usersCount = await prisma.user.count();
-    } catch (err) {
-      console.log(err);
-    }
+    await ssg.membership.getAllMemberships.prefetch();
+    await ssg.consumptions.getConsumptionsGrouped.prefetch();
+    await ssg.promotions.getAllPromotions.prefetch();
+    await ssg.user.getAllUsers.prefetch();
 
     return {
       props: {
-        allMemberships,
-        allConsumptionsByCategories,
-        allPromotions,
-        allConsumptions,
-        allUsers,
-        usersCount,
+        trpcState: ssg.dehydrate(),
       },
     };
   }

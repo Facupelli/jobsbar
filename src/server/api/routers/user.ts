@@ -10,6 +10,14 @@ import { prisma } from "~/server/db";
 import { fetchUserConsumptionsByCategories } from "~/utils/admin";
 
 export const userRouter = createTRPCRouter({
+  getAllUsers: protectedProcedure.query(async () => {
+    const allUsers = await prisma.user.findMany({});
+
+    const usersCount = await prisma.user.count();
+
+    return { allUsers, usersCount };
+  }),
+
   getUserById: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
