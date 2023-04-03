@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Link from "next/link";
 import { type GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import { useState } from "react";
@@ -9,12 +10,12 @@ import AdminLayout from "~/components/Admin/AdminLayout";
 import Nav from "~/components/Nav";
 import Table from "~/components/Table";
 
-import type { Consumption, Membership, Promotion, User } from "~/types/model";
-import Link from "next/link";
 import {
   fetchAllConsumptionsByCategories,
   fetchAllPromotions,
 } from "~/utils/admin";
+
+import type { Consumption, Membership, Promotion, User } from "~/types/model";
 
 type Props = {
   allConsumptionsByCategories: {

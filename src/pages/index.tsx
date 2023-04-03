@@ -1,11 +1,13 @@
+import { useForm } from "react-hook-form";
 import { type NextPage } from "next";
 import Head from "next/head";
-
-import { api } from "~/utils/api";
-import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+
 import Nav from "~/components/Nav";
+import Modal from "~/components/Modal";
+
+import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
   return (
@@ -60,7 +62,6 @@ function LoginInput() {
               setValue("id", "");
             }
 
-            console.log(data);
             if (data?.success) {
               router.push(`/user/${id}`);
             }
@@ -89,15 +90,16 @@ function LoginInput() {
 
   return (
     <>
-      {/* {submitError && !!submitError && (
+      {submitError && !!submitError && (
         <Modal
           isOpen={!!submitError}
           handleCloseModal={() => setError("")}
           error
         >
+          <h1 className="pb-2 text-xl font-bold text-red-700">Error</h1>
           <p>{submitError}</p>
         </Modal>
-      )} */}
+      )}
       <form>
         <section>
           <input

@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Dispatch, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { Routes } from "~/pages/admin";
 
 type AdminLayoutProps = {
