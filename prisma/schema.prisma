@@ -6,11 +6,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
@@ -55,6 +51,12 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+
+    roles         Role[]    @relation("UserRole")
+    membership              Membership?           @relation(fields: [membershipId], references: [id])
+    membershipId            String
+    consumptions            ConsumptionOnUser[]
+    promotions              PromotionOnUser[]
 }
 
 model VerificationToken {
@@ -64,3 +66,81 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+// JOBSBAR
+
+model Role {
+    id          String @default(cuid()) @id
+    name        String
+    users       User[] @relation("UserRole")
+}
+
+model Membership {
+  id                      String                @default(cuid()) @id
+  name                    String                @unique
+  minPoints               Int
+  maxPoints               Int?
+  users                   User[]
+  promotions              Promotion[]
+}
+
+model ConsumptionCategory {
+  id                      String                @default(cuid()) @id
+  name                    String                @unique
+  consumptions            Consumption[]
+}
+
+model Consumption {
+  id                            String                      @default(cuid()) @id
+  name                          String                      @unique
+  consumptionCategory           ConsumptionCategory         @relation(fields: [consumptionCategoryId], references: [id])
+  consumptionCategoryId         String
+  points                        Int
+  users                         ConsumptionOnUser[]
+  promotions                    ConsumptionOnPromotion[]
+}
+
+model ConsumptionOnUser {
+  id                      String            @default(cuid()) @id
+  user                    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                  String
+  consumption             Consumption       @relation(fields: [consumptionId], references: [id], onDelete: Cascade)
+  consumptionId           String
+  winner                  Boolean?
+  quantity                Int
+  createdAt               DateTime          @default(now()) @map(name: "created_at")
+}
+
+model Promotion {
+  id                      String                     @default(cuid()) @id
+  name                    String 
+  points                  Int
+  discount                Int  
+  active                  Boolean                    @default(true)
+  memberships             Membership[]
+  users                   PromotionOnUser[]
+  consumptions            ConsumptionOnPromotion[]
+}
+
+model ConsumptionOnPromotion {
+  consumption             Consumption       @relation(fields: [consumptionId], references: [id], onDelete: Cascade)
+  consumptionId           String
+  promotion               Promotion         @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotionId             String
+  quantity                Int
+  createdAt               DateTime          @default(now()) @map(name: "created_at")
+
+  @@id([consumptionId, promotionId])
+}
+
+model PromotionOnUser {
+  id                      String            @default(cuid()) @id
+  promotion               Promotion         @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotionId             String
+  user                    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                  String
+  quantity                Int
+  createdAt               DateTime          @default(now()) @map(name: "created_at")
+}
+
+
