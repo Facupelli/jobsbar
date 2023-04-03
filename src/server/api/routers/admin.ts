@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
@@ -46,5 +47,29 @@ export const adminRouter = createTRPCRouter({
       } catch (err) {
         console.log(err);
       }
+    }),
+
+  createUser: protectedProcedure
+    .input(z.object({ name: z.string() }))
+    .mutation(async ({ input }) => {
+      const lowestMembership = await prisma.membership.findFirst({
+        orderBy: { minPoints: "asc" },
+        select: { id: true },
+      });
+
+      if (!lowestMembership) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "No existe una membresía para aplicarle al usuario",
+        });
+      }
+      await prisma.user.create({
+        data: {
+          membershipId: lowestMembership.id,
+          name: input.name,
+        },
+      });
+
+      return { success: true };
     }),
 });

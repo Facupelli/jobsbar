@@ -1,28 +1,23 @@
+import { useForm } from "react-hook-form";
 import Head from "next/head";
 import Link from "next/link";
+import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import superjason from "superjson";
 import { type GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
 import { Dispatch, SetStateAction, useState } from "react";
 import { authOptions } from "~/server/auth";
 import { prisma } from "~/server/db";
+import { appRouter } from "~/server/api/root";
+import { api } from "~/utils/api";
 
 import AdminLayout from "~/components/Admin/AdminLayout";
 import Nav from "~/components/Nav";
 import Table from "~/components/Table";
-
-import {
-  fetchAllConsumptionsByCategories,
-  fetchAllPromotions,
-} from "~/utils/admin";
-
-import type { Consumption, Membership, Promotion, User } from "~/types/model";
-import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
 import Modal from "~/components/Modal";
-import { useForm } from "react-hook-form";
-import { api } from "~/utils/api";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import { appRouter } from "~/server/api/root";
+
+import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
+import type { Consumption, Membership, Promotion, User } from "~/types/model";
 
 type Props = {
   allConsumptionsByCategories: ConsumptionsGrouped[];
@@ -353,21 +348,84 @@ function Promotions({
 }
 
 function Users({ users, totalUsers }: { users: User[]; totalUsers: number }) {
+  const [showModal, setShowModal] = useState(false);
+
   return (
-    <section>
-      <h1 className="p-3 text-lg font-semibold">Usuarios</h1>
-      <Table trTitles={["", "Nombre", "ID"]}>
-        {users.map((user, i) => (
-          <tr key={user.id}>
-            <td className="border-b border-gray-300 p-3">{i + 1}</td>
-            <td className="border-b border-gray-300 p-3">
-              <Link href={`/user/${user.id}`}>{user.name}</Link>
-            </td>
-            <td className="border-b border-gray-300 p-3">{user.id}</td>
-          </tr>
-        ))}
-      </Table>
-    </section>
+    <>
+      {showModal && (
+        <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
+          <CreateUser setShowModal={setShowModal} />
+        </Modal>
+      )}
+
+      <section>
+        <div className="flex items-center justify-between pb-6">
+          <h1 className="p-3 text-lg font-semibold">Usuarios</h1>
+          <button
+            type="button"
+            onClick={() => setShowModal(true)}
+            className="rounded bg-green-500 p-2 text-neutral-100"
+          >
+            Crear usuario
+          </button>
+        </div>
+        <Table trTitles={["", "Nombre", "ID"]}>
+          {users.map((user, i) => (
+            <tr key={user.id}>
+              <td className="border-b border-gray-300 p-3">{i + 1}</td>
+              <td className="border-b border-gray-300 p-3">
+                <Link href={`/user/${user.id}`}>{user.name}</Link>
+              </td>
+              <td className="border-b border-gray-300 p-3">{user.id}</td>
+            </tr>
+          ))}
+        </Table>
+      </section>
+    </>
+  );
+}
+
+type CreateUser = {
+  name: string;
+};
+
+function CreateUser({
+  setShowModal,
+}: {
+  setShowModal: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { register, handleSubmit } = useForm<CreateUser>();
+  const ctx = api.useContext();
+  const { mutate } = api.admin.createUser.useMutation();
+
+  const onSubmit = (data: CreateUser) => {
+    mutate(data, {
+      onSuccess: () => {
+        setShowModal(false);
+        ctx.user.getAllUsers.invalidate();
+      },
+    });
+  };
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+      <div className="grid gap-1">
+        <label htmlFor="name">Nombre y Apellido:</label>
+        <input
+          type="text"
+          {...register("name")}
+          required
+          id="name"
+          className="rounded border border-neutral-600 p-1"
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="rounded-sm bg-green-500 p-1 font-semibold text-neutral-100"
+      >
+        CREAR
+      </button>
+    </form>
   );
 }
 
