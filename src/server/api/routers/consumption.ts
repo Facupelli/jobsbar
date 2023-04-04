@@ -25,4 +25,26 @@ export const consumptionRouter = createTRPCRouter({
       console.log(err);
     }
   }),
+
+  editConsumption: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        points: z.number(),
+        categoryId: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await prisma.consumption.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          points: input.points,
+          consumptionCategoryId: input.categoryId,
+        },
+      });
+
+      return { success: true };
+    }),
 });

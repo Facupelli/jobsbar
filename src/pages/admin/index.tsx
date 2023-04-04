@@ -17,7 +17,7 @@ import Table from "~/components/Table";
 import Modal from "~/components/Modal";
 
 import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
-import type { Membership, User } from "~/types/model";
+import type { Consumption, Membership, User } from "~/types/model";
 import type {
   Active,
   AdminPromotion,
@@ -261,6 +261,7 @@ function Consumptions({
 }: {
   consumptions: ConsumptionsGrouped[];
 }) {
+  const [consumption, setConsumption] = useState<Consumption | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [active, setActive] = useState<Active>("Bebida");
 
@@ -278,6 +279,7 @@ function Consumptions({
             setShowModal={setShowModal}
             categories={categories}
             active={active}
+            consumption={consumption}
           />
         </Modal>
       )}
@@ -308,7 +310,10 @@ function Consumptions({
             <h1 className="p-3 text-lg font-semibold">{active}</h1>
             <button
               type="button"
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setConsumption(null);
+                setShowModal(true);
+              }}
               className="rounded bg-green-500 p-2 text-neutral-100"
             >
               Crear {active}
@@ -323,8 +328,18 @@ function Consumptions({
                 <td className="border-b border-gray-300 p-3">
                   {consumption.points}
                 </td>
-                <td className="border-b border-gray-300 p-3">Editar</td>
-                <td className="border-b border-gray-300 p-3">Eliminar</td>
+                <td
+                  onClick={() => {
+                    setShowModal(true);
+                    setConsumption(consumption);
+                  }}
+                  className="cursor-pointer border-b border-gray-300 p-3"
+                >
+                  Editar
+                </td>
+                <td className="cursor-pointer border-b border-gray-300 p-3">
+                  Eliminar
+                </td>
               </tr>
             ))}
           </Table>
@@ -338,21 +353,37 @@ function CreateConsumption({
   setShowModal,
   categories,
   active,
+  consumption,
 }: {
   setShowModal: Dispatch<SetStateAction<boolean>>;
   categories: { id: string; name: string }[];
   active: Active;
+  consumption: Consumption | null;
 }) {
   const { register, handleSubmit } = useForm<CreateConsumption>({
     defaultValues: {
       categoryId: categories.find((c) => c.name === active)?.id,
+      name: consumption?.name,
+      points: consumption?.points,
     },
   });
   const ctx = api.useContext();
-  const { mutate } = api.admin.postConsumption.useMutation();
+  const createConsumption = api.admin.postConsumption.useMutation();
+  const editConsumption = api.consumptions.editConsumption.useMutation();
 
   const onSubmit = (data: CreateConsumption) => {
-    mutate(data, {
+    if (consumption) {
+      return editConsumption.mutate(
+        { ...data, id: consumption.id },
+        {
+          onSuccess: () => {
+            setShowModal(false);
+            ctx.consumptions.getConsumptionsGrouped.invalidate();
+          },
+        }
+      );
+    }
+    return createConsumption.mutate(data, {
       onSuccess: () => {
         setShowModal(false);
         ctx.consumptions.getConsumptionsGrouped.invalidate();
@@ -398,7 +429,7 @@ function CreateConsumption({
         type="submit"
         className="rounded-sm bg-green-500 p-1 font-semibold text-neutral-100"
       >
-        CREAR
+        {consumption ? "EDITAR" : "CREAR"}
       </button>
     </form>
   );

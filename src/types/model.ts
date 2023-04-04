@@ -27,7 +27,7 @@ export type Consumption = {
   id: string;
   name: string;
   consumptionCategory?: ConsumptionCategory;
-  consumptionCategoryId: string;
+  consumptionCategoryId?: string;
   points: number;
   users?: ConsumptionOnUser[];
   promotions?: ConsumptionOnPromotion[];
