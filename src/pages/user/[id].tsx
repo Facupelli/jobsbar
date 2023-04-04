@@ -363,6 +363,19 @@ function LastConsumptions({
 }: {
   userConsumptions: ConsumptionOnUser[];
 }) {
+  const ctx = api.useContext();
+  const { mutate } = api.user.updateGameStatus.useMutation();
+  const handleUpdateGameStatus = (id: string, status: boolean) => {
+    mutate(
+      { id, winner: status },
+      {
+        onSuccess: () => {
+          ctx.user.getUser.invalidate();
+        },
+      }
+    );
+  };
+
   return (
     <details className="rounded-sm bg-white p-4">
       <summary className="cursor-pointer">Últimas consumiciones:</summary>
@@ -377,7 +390,32 @@ function LastConsumptions({
                   {consumption.consumption?.name}
                 </td>
                 <td className="border-b border-gray-300 p-3">
-                  {consumption.consumption?.name}
+                  {consumption.consumption?.consumptionCategory?.name ===
+                    "Juego" &&
+                    (consumption.winner === null ? (
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() =>
+                            handleUpdateGameStatus(consumption.id, true)
+                          }
+                          className="rounded bg-green-500 p-2 text-neutral-100"
+                        >
+                          GANÓ
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleUpdateGameStatus(consumption.id, false)
+                          }
+                          className="rounded bg-red-600 p-2 text-neutral-100"
+                        >
+                          PERDIÓ
+                        </button>
+                      </div>
+                    ) : consumption.winner ? (
+                      "SI"
+                    ) : (
+                      "NO"
+                    ))}
                 </td>
                 <td className="border-b border-gray-300 p-3">
                   {consumption.quantity}

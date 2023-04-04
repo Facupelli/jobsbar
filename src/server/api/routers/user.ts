@@ -48,7 +48,11 @@ export const userRouter = createTRPCRouter({
             membership: {
               include: { promotions: { include: { consumptions: true } } },
             },
-            consumptions: { include: { consumption: true } },
+            consumptions: {
+              include: {
+                consumption: { include: { consumptionCategory: true } },
+              },
+            },
           },
         });
 
@@ -128,6 +132,19 @@ export const userRouter = createTRPCRouter({
           totalPoints: {
             increment: Number(input.points),
           },
+        },
+      });
+
+      return { success: true };
+    }),
+
+  updateGameStatus: protectedProcedure
+    .input(z.object({ winner: z.boolean(), id: z.string() }))
+    .mutation(async ({ input }) => {
+      await prisma.consumptionOnUser.update({
+        where: { id: input.id },
+        data: {
+          winner: input.winner,
         },
       });
 
