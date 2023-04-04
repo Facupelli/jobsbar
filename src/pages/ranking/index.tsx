@@ -22,6 +22,8 @@ type Props = {
 };
 
 export default function Ranking({ allGames }: Props) {
+  const ctx = api.useContext();
+
   const [gameActive, setGameActive] = useState<Consumption | null>(
     allGames[0] ?? null
   );
@@ -49,7 +51,7 @@ export default function Ranking({ allGames }: Props) {
     });
 
     socket.on("gameOver", async (data: GameOver) => {
-      // getGameRanking(data.id, setUsersRanking);
+      ctx.ranking.getGameRankingById.invalidate();
     });
 
     if (socket) return () => socket.disconnect();
