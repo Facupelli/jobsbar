@@ -5,6 +5,7 @@ import { consumptionRouter } from "./routers/consumption";
 import { promotionRouter } from "./routers/promotions";
 import { adminRouter } from "./routers/admin";
 import { membershipRouter } from "./routers/membership";
+import { rankingRouter } from "./routers/ranking";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   promotions: promotionRouter,
   admin: adminRouter,
   membership: membershipRouter,
+  ranking: rankingRouter,
 });
 
 // export type definition of API

@@ -1,32 +1,30 @@
-import axios from "axios";
+import { useForm } from "react-hook-form";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import superjason from "superjson";
 import { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import Modal from "~/components/Modal";
-import Nav from "~/components/Nav";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
-import type { Promotion, User } from "~/types/model";
-import { Membership } from "~/types/model";
-import { ConsumptionOnUser } from "~/types/model";
-import {
+
+import Table from "~/components/Table";
+import Modal from "~/components/Modal";
+import Nav from "~/components/Nav";
+import SearchInput from "~/components/SearchInput";
+
+import { useUserIdHotkeys } from "~/hooks/useUserIdHotkeys";
+
+import type { ConsumptionActive } from "~/types/admin";
+import type {
   ConsumptionsGrouped,
   UserConsumptionsGrouped,
 } from "~/types/consumptionsByCategory";
-import Table from "~/components/Table";
-import { useForm } from "react-hook-form";
-import SearchIcon from "~/icons/SearchIcon";
-import SearchInput from "~/components/SearchInput";
-import { useUserIdHotkeys } from "~/hooks/useUserIdHotkeys";
-import { ConsumptionActive } from "~/types/admin";
-
-// import { useUserIdHotkeys } from "../../src/hooks/useUserIdHotkeys";
-
-const trLastConsumptionsTitles = ["consumición", "ganó?", "cantidad", "fecha"];
+import type { Promotion, User } from "~/types/model";
+import type { Membership } from "~/types/model";
+import type { ConsumptionOnUser } from "~/types/model";
+import axios from "axios";
 
 type Props = {
   id: string;
@@ -244,9 +242,14 @@ function ConsumptionsList({
     mutate(
       { userId, consumptionId, points, quantity: 1 },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           ctx.user.getUserConsumptionsGrouped.invalidate();
           ctx.user.getUser.invalidate();
+
+          //post al scoket
+          await axios.post(`http://localhost:3000/api/socket/postConsumption`, {
+            consumptionType: name,
+          });
         },
       }
     );
@@ -316,8 +319,13 @@ function PromotionsList({
     mutate(
       { userId, promotionId, points, quantity: 1 },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           ctx.user.getUser.invalidate();
+
+          //post al socket
+          await axios.post(
+            `http://localhost:3000/api/socket/exchangePromotion`
+          );
         },
       }
     );
@@ -365,12 +373,21 @@ function LastConsumptions({
 }) {
   const ctx = api.useContext();
   const { mutate } = api.user.updateGameStatus.useMutation();
-  const handleUpdateGameStatus = (id: string, status: boolean) => {
+  const handleUpdateGameStatus = (
+    id: string,
+    status: boolean,
+    gameId: string | undefined
+  ) => {
     mutate(
       { id, winner: status },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           ctx.user.getUser.invalidate();
+
+          // post al socket
+          await axios.post(`http://localhost:3000/api/socket/gameOver`, {
+            id: gameId,
+          });
         },
       }
     );
@@ -381,59 +398,64 @@ function LastConsumptions({
       <summary className="cursor-pointer">Últimas consumiciones:</summary>
       <div className="pt-4">
         <Table trTitles={["consumición", "ganó?", "cantidad", "fecha"]}>
-          {userConsumptions
-            .slice(0, 10)
-            .reverse()
-            .map((consumption) => (
-              <tr key={consumption.id}>
-                <td className="border-b border-gray-300 p-3">
-                  {consumption.consumption?.name}
-                </td>
-                <td className="border-b border-gray-300 p-3">
-                  {consumption.consumption?.consumptionCategory?.name ===
-                    "Juego" &&
-                    (consumption.winner === null ? (
-                      <div className="flex gap-4">
-                        <button
-                          onClick={() =>
-                            handleUpdateGameStatus(consumption.id, true)
-                          }
-                          className="rounded bg-green-500 p-2 text-neutral-100"
-                        >
-                          GANÓ
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleUpdateGameStatus(consumption.id, false)
-                          }
-                          className="rounded bg-red-600 p-2 text-neutral-100"
-                        >
-                          PERDIÓ
-                        </button>
-                      </div>
-                    ) : consumption.winner ? (
-                      "SI"
-                    ) : (
-                      "NO"
-                    ))}
-                </td>
-                <td className="border-b border-gray-300 p-3">
-                  {consumption.quantity}
-                </td>
-                <td className="border-b border-gray-300 p-3">
-                  {new Date(consumption.createdAt).toLocaleDateString("es-AR", {
-                    year: "numeric",
-                    day: "numeric",
-                    month: "short",
-                  })}
-                  {" - "}
-                  {new Date(consumption.createdAt).toLocaleTimeString("es-AR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </td>
-              </tr>
-            ))}
+          {userConsumptions.slice(0, 10).map((consumption) => (
+            <tr key={consumption.id}>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.consumption?.name}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.consumption?.consumptionCategory?.name ===
+                  "Juego" &&
+                  (consumption.winner === null ? (
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() =>
+                          handleUpdateGameStatus(
+                            consumption.id,
+                            true,
+                            consumption.consumption?.id
+                          )
+                        }
+                        className="rounded bg-green-500 p-2 text-neutral-100"
+                      >
+                        GANÓ
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleUpdateGameStatus(
+                            consumption.id,
+                            false,
+                            consumption.consumption?.id
+                          )
+                        }
+                        className="rounded bg-red-600 p-2 text-neutral-100"
+                      >
+                        PERDIÓ
+                      </button>
+                    </div>
+                  ) : consumption.winner ? (
+                    "SI"
+                  ) : (
+                    "NO"
+                  ))}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {consumption.quantity}
+              </td>
+              <td className="border-b border-gray-300 p-3">
+                {new Date(consumption.createdAt).toLocaleDateString("es-AR", {
+                  year: "numeric",
+                  day: "numeric",
+                  month: "short",
+                })}
+                {" - "}
+                {new Date(consumption.createdAt).toLocaleTimeString("es-AR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </td>
+            </tr>
+          ))}
         </Table>
       </div>
     </details>

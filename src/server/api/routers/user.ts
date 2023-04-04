@@ -52,6 +52,7 @@ export const userRouter = createTRPCRouter({
               include: {
                 consumption: { include: { consumptionCategory: true } },
               },
+              orderBy: { createdAt: "desc" },
             },
           },
         });
