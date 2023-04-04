@@ -19,6 +19,8 @@ import {
 } from "~/types/consumptionsByCategory";
 import Table from "~/components/Table";
 import { useForm } from "react-hook-form";
+import SearchIcon from "~/icons/SearchIcon";
+import SearchInput from "~/components/SearchInput";
 
 // import { useUserIdHotkeys } from "../../src/hooks/useUserIdHotkeys";
 
@@ -243,13 +245,8 @@ function ConsumptionsList({
   };
 
   return (
-    <div className="grid gap-4">
-      <input
-        type="search"
-        className="max-w-md rounded border border-neutral-600 p-2"
-        placeholder="Fernet"
-        {...register("name")}
-      />
+    <div className="grid gap-6">
+      <SearchInput register={register} />
       <div className="flex gap-4">
         {filteredConsumptions.map((consumption) => (
           <div
@@ -323,12 +320,7 @@ function PromotionsList({
 
   return (
     <div className="grid gap-4">
-      <input
-        type="search"
-        className="max-w-md rounded border border-neutral-600 p-2"
-        placeholder="Fernet 2x1"
-        {...register("name")}
-      />
+      <SearchInput register={register} />
       <div className="flex gap-4">
         {filteredPromos?.map((promo) => (
           <div
