@@ -14,7 +14,7 @@ export const adminRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         minPoints: z.number(),
-        maxPoints: z.number(),
+        maxPoints: z.number().nullable(),
       })
     )
     .mutation(async ({ input }) => {

@@ -90,13 +90,17 @@ export default function Admin() {
 }
 
 function Memberships({ memberships }: { memberships: Membership[] }) {
+  const [membership, setMembership] = useState<Membership | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   return (
     <>
       {showModal && (
         <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
-          <CreateMembership setShowModal={setShowModal} />
+          <CreateMembership
+            setShowModal={setShowModal}
+            membership={membership}
+          />
         </Modal>
       )}
       <section>
@@ -104,7 +108,10 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
           <h1 className="p-3 text-lg font-semibold">Membresías</h1>
           <button
             type="button"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setMembership(null);
+              setShowModal(true);
+            }}
             className="rounded bg-green-500 p-2 text-neutral-100"
           >
             Crear membresía
@@ -122,7 +129,15 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
               <td className="border-b border-gray-300 p-3">
                 {membership.maxPoints}
               </td>
-              <td className="border-b border-gray-300 p-3">Editar</td>
+              <td
+                className="cursor-pointer border-b border-gray-300 p-3"
+                onClick={() => {
+                  setMembership(membership);
+                  setShowModal(true);
+                }}
+              >
+                Editar
+              </td>
               <td className="border-b border-gray-300 p-3">Eliminar</td>
             </tr>
           ))}
@@ -134,15 +149,31 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
 
 function CreateMembership({
   setShowModal,
+  membership,
 }: {
   setShowModal: Dispatch<SetStateAction<boolean>>;
+  membership: Membership | null;
 }) {
   const ctx = api.useContext();
-  const { register, handleSubmit } = useForm<CreateMembership>();
-  const { mutate } = api.admin.postMembership.useMutation();
+  const { register, handleSubmit } = useForm<CreateMembership>({
+    defaultValues: membership ?? {},
+  });
+  const createMembership = api.admin.postMembership.useMutation();
+  const editMembership = api.membership.editMembershipById.useMutation();
 
   const onSubmit = (data: CreateMembership) => {
-    mutate(data, {
+    if (membership) {
+      return editMembership.mutate(
+        { ...data, id: membership.id },
+        {
+          onSuccess: () => {
+            setShowModal(false);
+            ctx.membership.getAllMemberships.invalidate();
+          },
+        }
+      );
+    }
+    return createMembership.mutate(data, {
       onSuccess: () => {
         setShowModal(false);
         ctx.membership.getAllMemberships.invalidate();
@@ -186,7 +217,7 @@ function CreateMembership({
         type="submit"
         className="rounded-sm bg-green-500 p-1 font-semibold text-neutral-100"
       >
-        CREAR
+        {membership ? "EDITAR" : "CREAR"}
       </button>
     </form>
   );
@@ -450,7 +481,6 @@ function CreatePromotion({
   const { mutate } = api.admin.createPromotion.useMutation();
 
   const onSubmit = (data: CreatePromotion) => {
-    console.log(data);
     mutate(
       {
         name: data.name,
@@ -467,7 +497,7 @@ function CreatePromotion({
       {
         onSuccess: () => {
           setShowModal(false);
-          ctx.user.getAllUsers.invalidate();
+          ctx.promotions.getAllPromotions.invalidate();
         },
       }
     );

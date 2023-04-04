@@ -9,4 +9,36 @@ export const membershipRouter = createTRPCRouter({
 
     return memberships;
   }),
+
+  editMembershipById: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        minPoints: z.number(),
+        maxPoints: z.number().nullable(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await prisma.membership.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          minPoints: input.minPoints,
+          maxPoints: input.maxPoints,
+        },
+      });
+
+      return { success: true };
+    }),
+
+  deleteMembershipById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      await prisma.membership.delete({
+        where: { id: input.id },
+      });
+
+      return { success: true };
+    }),
 });

@@ -11,7 +11,7 @@ export type CreateUser = {
 export type CreateMembership = {
   name: string;
   minPoints: number;
-  maxPoints: number;
+  maxPoints: number | null;
 };
 
 export type Active = "Comida" | "Bebida" | "Juego";
