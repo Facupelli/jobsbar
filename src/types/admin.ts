@@ -1,3 +1,5 @@
+export type ConsumptionActive = "Bebida" | "Comida" | "Juego" | "Promociones";
+
 export type CreateConsumption = {
   name: string;
   categoryId: string;

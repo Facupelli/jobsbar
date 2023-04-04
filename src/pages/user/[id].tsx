@@ -21,6 +21,8 @@ import Table from "~/components/Table";
 import { useForm } from "react-hook-form";
 import SearchIcon from "~/icons/SearchIcon";
 import SearchInput from "~/components/SearchInput";
+import { useUserIdHotkeys } from "~/hooks/useUserIdHotkeys";
+import { ConsumptionActive } from "~/types/admin";
 
 // import { useUserIdHotkeys } from "../../src/hooks/useUserIdHotkeys";
 
@@ -29,8 +31,6 @@ const trLastConsumptionsTitles = ["consumición", "ganó?", "cantidad", "fecha"]
 type Props = {
   id: string;
 };
-
-type ConsumptionActive = "Bebida" | "Comida" | "Juego" | "Promociones";
 
 const UserDetail: NextPage<Props> = ({ id }) => {
   const router = useRouter();
@@ -46,6 +46,14 @@ const UserDetail: NextPage<Props> = ({ id }) => {
   const [error, setError] = useState<string>("");
   const [consumptionActive, setConsumptionActive] =
     useState<ConsumptionActive>("Bebida");
+
+  useUserIdHotkeys(
+    setConsumptionActive,
+    userConsumptionsGrouped.data?.map((category) => ({
+      name: category.name,
+      id: category.id,
+    }))
+  );
 
   if (!user.data || !consumptions.data || !userConsumptionsGrouped.data)
     return <div>404</div>;
