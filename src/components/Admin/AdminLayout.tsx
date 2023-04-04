@@ -33,7 +33,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
       <ul className="grid gap-4 p-4">
         <li
           className={`p-2 ${
-            route === "admin" ? "rounded bg-green-500  text-neutral-900" : null
+            route === "home" ? "rounded bg-green-500  text-neutral-900" : null
           }`}
         >
           <button onClick={() => setRoute("home")} className="">

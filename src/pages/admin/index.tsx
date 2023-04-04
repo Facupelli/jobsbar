@@ -105,8 +105,6 @@ function Home() {
   )
     return <div>404</div>;
 
-  console.log(mostPopularPromotion.data);
-
   return (
     <section className="grid gap-10">
       {mostPopularConsumptions.data.map((category) => (
