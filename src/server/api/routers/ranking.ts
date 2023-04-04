@@ -68,19 +68,6 @@ export const rankingRouter = createTRPCRouter({
 
       const winnersByUser = getWinnersByUser(game);
 
-      //   const ranking = playersGameConsumptions?.users?.reduce((acc, curr) => {
-      //     if (curr.user.id in acc) {
-      //       acc[curr.user.id].quantity += curr.quantity;
-      //     } else {
-      //       acc[curr.user.id] = curr;
-      //     }
-      //     return acc;
-      //   }, Object.create({}));
-
-      //   const result = Object.keys(ranking).map(
-      //     (id) => ranking[id as keyof typeof ranking]
-      //   );
-
       return winnersByUser;
     }),
 });
