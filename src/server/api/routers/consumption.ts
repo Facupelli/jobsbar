@@ -47,4 +47,18 @@ export const consumptionRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  deleteConsumption: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await prisma.consumption.delete({
+        where: { id: input.id },
+      });
+
+      return { success: true };
+    }),
 });

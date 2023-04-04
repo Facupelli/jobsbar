@@ -261,9 +261,13 @@ function Consumptions({
 }: {
   consumptions: ConsumptionsGrouped[];
 }) {
+  const ctx = api.useContext();
   const [consumption, setConsumption] = useState<Consumption | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [active, setActive] = useState<Active>("Bebida");
+
+  const { mutate } = api.consumptions.deleteConsumption.useMutation();
 
   const selectedConsumption = consumptions.find(
     (category) => category.name === active
@@ -271,8 +275,28 @@ function Consumptions({
 
   const categories = consumptions.map((c) => ({ name: c.name, id: c.id }));
 
+  const handleDelete = (id: string) => {
+    mutate(
+      { id },
+      {
+        onSuccess: () => {
+          setShowDeleteModal(false);
+          ctx.consumptions.getConsumptionsGrouped.invalidate();
+        },
+      }
+    );
+  };
+
   return (
     <>
+      {showDeleteModal && consumption && (
+        <Modal
+          isOpen={showDeleteModal}
+          handleCloseModal={() => setShowDeleteModal(false)}
+        >
+          <DeleteModal handleDelete={handleDelete} id={consumption.id} />
+        </Modal>
+      )}
       {showModal && (
         <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
           <CreateConsumption
@@ -337,7 +361,13 @@ function Consumptions({
                 >
                   Editar
                 </td>
-                <td className="cursor-pointer border-b border-gray-300 p-3">
+                <td
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                    setConsumption(consumption);
+                  }}
+                  className="cursor-pointer border-b border-gray-300 p-3"
+                >
                   Eliminar
                 </td>
               </tr>
