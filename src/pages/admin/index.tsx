@@ -17,7 +17,7 @@ import Table from "~/components/Table";
 import Modal from "~/components/Modal";
 
 import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
-import type { Consumption, Membership, User } from "~/types/model";
+import type { Consumption, Membership, Promotion, User } from "~/types/model";
 import type {
   Active,
   AdminPromotion,
@@ -474,10 +474,35 @@ function Promotions({
   promotions: AdminPromotion[];
   memberships: Membership[];
 }) {
+  const ctx = api.useContext();
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [promotion, setPromotion] = useState<AdminPromotion | null>(null);
+
+  const { mutate } = api.promotions.deletePromotion.useMutation();
+
+  const handleDelete = (id: string) => {
+    mutate(
+      { id },
+      {
+        onSuccess: () => {
+          ctx.promotions.getAllPromotions.invalidate();
+          setShowDeleteModal(false);
+        },
+      }
+    );
+  };
 
   return (
     <>
+      {showDeleteModal && promotion && (
+        <Modal
+          isOpen={showDeleteModal}
+          handleCloseModal={() => setShowDeleteModal(false)}
+        >
+          <DeleteModal handleDelete={handleDelete} id={promotion.id} />
+        </Modal>
+      )}
       {showModal && (
         <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
           <CreatePromotion
@@ -552,7 +577,15 @@ function Promotions({
                 {promo.discount}%
               </td>
               <td className="border-b border-gray-300 p-3">{promo.points}</td>
-              <td className="border-b border-gray-300 p-3">Eliminar</td>
+              <td
+                onClick={() => {
+                  setPromotion(promo);
+                  setShowDeleteModal(true);
+                }}
+                className="cursor-pointer border-b border-gray-300 p-3"
+              >
+                Eliminar
+              </td>
             </tr>
           ))}
         </Table>

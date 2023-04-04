@@ -98,4 +98,14 @@ export const promotionRouter = createTRPCRouter({
         console.log(err);
       }
     }),
+
+  deletePromotion: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      await prisma.promotion.delete({
+        where: { id: input.id },
+      });
+
+      return { success: true };
+    }),
 });
