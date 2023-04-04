@@ -7,8 +7,79 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import {
+  fetchAllConsumptionsByCategories,
+  getConsumptionsReducedQuantity,
+} from "~/utils/admin";
 
 export const adminRouter = createTRPCRouter({
+  getMostPopularConsumptions: protectedProcedure.query(async () => {
+    const categories = await prisma.consumptionCategory.findMany({
+      include: {
+        consumptions: {
+          include: {
+            users: true,
+          },
+        },
+      },
+      take: 5,
+    });
+
+    if (!categories) {
+      return;
+    }
+
+    const mostPopular = categories.map((category) => ({
+      ...category,
+      consumptions: category.consumptions
+        .map((consumption) => ({
+          name: consumption.name,
+          total: consumption.users.reduce((acc, curr) => {
+            return acc + curr.quantity;
+          }, 0),
+        }))
+        .sort((a, b) => (a.total > b.total ? -1 : 1)),
+    }));
+
+    return mostPopular;
+    // const ew = getConsumptionsReducedQuantity(consumptions[0]?.consumptions)
+  }),
+
+  getMostPopularPromotion: protectedProcedure.query(async () => {
+    const promotions = await prisma.promotion.findMany({
+      include: {
+        users: true,
+      },
+      take: 10,
+    });
+
+    if (!promotions) {
+      return;
+    }
+
+    const mostPopular = promotions
+      .map((promo) => ({
+        name: promo.name,
+        total: promo.users.reduce((acc, curr) => {
+          return acc + curr.quantity;
+        }, 0),
+      }))
+      .sort((a, b) => (a.total > b.total ? -1 : 1));
+
+    return mostPopular;
+  }),
+
+  getMostValuableUser: protectedProcedure.query(async () => {
+    const users = await prisma?.user.findMany({
+      orderBy: {
+        totalPointsSpent: "desc",
+      },
+      take: 10,
+    });
+
+    return users;
+  }),
+
   postMembership: protectedProcedure
     .input(
       z.object({

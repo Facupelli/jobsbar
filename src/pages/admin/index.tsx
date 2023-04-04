@@ -66,6 +66,7 @@ export default function Admin() {
 
       <main className="min-h-screen bg-gray-200">
         <AdminLayout route={route} setRoute={setRoute}>
+          {route === "home" && <Home />}
           {route === "memberships" && (
             <Memberships memberships={memberships.data} />
           )}
@@ -88,6 +89,78 @@ export default function Admin() {
         </AdminLayout>
       </main>
     </div>
+  );
+}
+
+function Home() {
+  const mostPopularConsumptions =
+    api.admin.getMostPopularConsumptions.useQuery();
+  const mostPopularPromotion = api.admin.getMostPopularPromotion.useQuery();
+  const mostValuableUser = api.admin.getMostValuableUser.useQuery();
+
+  if (
+    !mostPopularConsumptions.data ||
+    !mostPopularPromotion.data ||
+    !mostValuableUser.data
+  )
+    return <div>404</div>;
+
+  console.log(mostPopularPromotion.data);
+
+  return (
+    <section className="grid gap-10">
+      {mostPopularConsumptions.data.map((category) => (
+        <div key={category.id}>
+          <h1 className="p-2 text-lg font-semibold">
+            {category.name} más popular
+          </h1>
+          <Table trTitles={["Nombre", "Total"]}>
+            {category.consumptions.map((consumption) => (
+              <tr key={consumption.name}>
+                <td className="w-1/2 border-b border-gray-300 p-3">
+                  {consumption.name}
+                </td>
+                <td className="w-1/2 border-b border-gray-300 p-3">
+                  {consumption.total}
+                </td>
+              </tr>
+            ))}
+          </Table>
+        </div>
+      ))}
+
+      <div>
+        <h1 className="p-2 text-lg font-semibold">Promo más popular</h1>
+        <Table trTitles={["Nombre", "Total"]}>
+          {mostPopularPromotion.data.map((promo) => (
+            <tr>
+              <td className="w-1/2 border-b border-gray-300 p-3">
+                {promo.name}
+              </td>
+              <td className="w-1/2 border-b border-gray-300 p-3">
+                {promo.total}
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </div>
+
+      <div>
+        <h1 className="p-2 text-lg font-semibold">Usuario más valorado</h1>
+        <Table trTitles={["Nombre", "Puntos Gastados"]}>
+          {mostValuableUser.data.map((user) => (
+            <tr>
+              <td className="w-1/2 border-b border-gray-300 p-3">
+                {user.name}
+              </td>
+              <td className="w-1/2 border-b border-gray-300 p-3">
+                {user.totalPointsSpent}
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </div>
+    </section>
   );
 }
 

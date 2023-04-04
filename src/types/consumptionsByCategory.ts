@@ -5,7 +5,10 @@ export type ConsumptionsGrouped = {
 };
 
 export type UserConsumptionsGrouped = {
-  consumptions: { name: string; users: { userId: String }[] }[];
+  consumptions: {
+    name: string;
+    users: { userId: String; quantity: number }[];
+  }[];
   id: string;
   name: string;
 };

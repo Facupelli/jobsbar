@@ -1,4 +1,9 @@
 import { prisma } from "~/server/db";
+import {
+  ConsumptionsGrouped,
+  UserConsumptionsGrouped,
+} from "~/types/consumptionsByCategory";
+import { Consumption } from "~/types/model";
 
 export const fetchAllConsumptionsByCategories = async () => {
   return await prisma.consumptionCategory.findMany({
@@ -30,6 +35,7 @@ export const fetchUserConsumptionsByCategories = async (userId: string) => {
           users: {
             select: {
               userId: true,
+              quantity: true,
             },
           },
         },
@@ -68,4 +74,18 @@ export const fetchAllPromotions = async () => {
       },
     },
   });
+};
+
+export const getConsumptionsReducedQuantity = (
+  consumptions: {
+    name: string;
+    users: { userId: String; quantity: number }[];
+  }[]
+) => {
+  return consumptions.map((consumption) => ({
+    ...consumption,
+    total: consumption.users.reduce((acc, curr) => {
+      return acc + curr.quantity;
+    }, 0),
+  }));
 };
