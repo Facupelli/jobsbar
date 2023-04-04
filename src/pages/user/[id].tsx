@@ -18,6 +18,7 @@ import {
   UserConsumptionsGrouped,
 } from "~/types/consumptionsByCategory";
 import Table from "~/components/Table";
+import { useForm } from "react-hook-form";
 
 // import { useUserIdHotkeys } from "../../src/hooks/useUserIdHotkeys";
 
@@ -203,7 +204,16 @@ function ConsumptionsList({
   userId: string;
 }) {
   const ctx = api.useContext();
-  const { mutate, isLoading } = api.user.postConsumptionOnUser.useMutation();
+  const { register, watch } = useForm<{ name: string }>();
+  const { mutate } = api.user.postConsumptionOnUser.useMutation();
+
+  const searchInput = watch("name");
+  let filteredConsumptions = selectedConsumption.consumptions;
+  if (searchInput) {
+    filteredConsumptions = selectedConsumption.consumptions.filter((c) =>
+      c.name.toLowerCase().includes(searchInput.toLowerCase())
+    );
+  }
 
   const handlePostConsumption = (
     userId: string,
@@ -222,29 +232,41 @@ function ConsumptionsList({
   };
 
   return (
-    <div className="flex gap-4">
-      {selectedConsumption.consumptions.map((consumption) => (
-        <div
-          key={consumption.name}
-          className="flex items-center gap-10 rounded bg-neutral-300 p-2"
-        >
-          <div>
-            <p className="text-sm">
-              <strong className="font-semibold">{consumption.name}</strong>
-            </p>
-            <p className="text-sm">{consumption.points} pts</p>
-          </div>
-          <button
-            onClick={() =>
-              handlePostConsumption(userId, consumption.id, consumption.points)
-            }
-            type="button"
-            className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
+    <div className="grid gap-4">
+      <input
+        type="search"
+        className="max-w-md rounded border border-neutral-600 p-2"
+        placeholder="Fernet"
+        {...register("name")}
+      />
+      <div className="flex gap-4">
+        {filteredConsumptions.map((consumption) => (
+          <div
+            key={consumption.name}
+            className="flex items-center gap-10 rounded bg-neutral-300 p-2"
           >
-            Cargar
-          </button>
-        </div>
-      ))}
+            <div>
+              <p className="text-sm">
+                <strong className="font-semibold">{consumption.name}</strong>
+              </p>
+              <p className="text-sm">{consumption.points} pts</p>
+            </div>
+            <button
+              onClick={() =>
+                handlePostConsumption(
+                  userId,
+                  consumption.id,
+                  consumption.points
+                )
+              }
+              type="button"
+              className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
+            >
+              Cargar
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -257,7 +279,18 @@ function PromotionsList({
   userId: string;
 }) {
   const ctx = api.useContext();
+  const { register, watch } = useForm<{ name: string }>();
   const { mutate } = api.promotions.postPromotionOnUser.useMutation();
+
+  if (!validPromotions) return <div>404</div>;
+
+  const searchInput = watch("name");
+  let filteredPromos = validPromotions;
+  if (searchInput) {
+    filteredPromos = validPromotions.filter((p) =>
+      p.name.toLowerCase().includes(searchInput.toLowerCase())
+    );
+  }
 
   const handlePostPromotion = (
     userId: string,
@@ -278,28 +311,38 @@ function PromotionsList({
     return <div>Actualemte no hay promociones para tu membresía.</div>;
 
   return (
-    <div className="flex gap-4">
-      {validPromotions?.map((promo) => (
-        <div
-          key={promo.id}
-          className="flex items-center gap-10 rounded bg-neutral-300 p-2 text-sm"
-        >
-          <div className="">
-            <p>
-              <strong className="font-semibold">{promo.name}</strong>
-            </p>
-            <p>Descuento: {promo.discount}%</p>
-            <p className="text-base">-{promo.points} pts</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => handlePostPromotion(userId, promo.id, promo.points)}
-            className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
+    <div className="grid gap-4">
+      <input
+        type="search"
+        className="max-w-md rounded border border-neutral-600 p-2"
+        placeholder="Fernet 2x1"
+        {...register("name")}
+      />
+      <div className="flex gap-4">
+        {filteredPromos?.map((promo) => (
+          <div
+            key={promo.id}
+            className="flex items-center gap-10 rounded bg-neutral-300 p-2 text-sm"
           >
-            Cargar
-          </button>
-        </div>
-      ))}
+            <div className="">
+              <p>
+                <strong className="font-semibold">{promo.name}</strong>
+              </p>
+              <p>Descuento: {promo.discount}%</p>
+              <p className="text-base">-{promo.points} pts</p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                handlePostPromotion(userId, promo.id, promo.points)
+              }
+              className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
+            >
+              Cargar
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
