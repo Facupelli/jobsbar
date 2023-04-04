@@ -27,6 +27,7 @@ import type {
   CreateUser,
 } from "~/types/admin";
 import DeleteModal from "~/components/DeleteModal";
+import LastTd from "~/components/Admin/LastTD";
 
 export type Routes =
   | "home"
@@ -154,24 +155,16 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
               <td className="border-b border-gray-300 p-3">
                 {membership.maxPoints}
               </td>
-              <td
-                className="cursor-pointer border-b border-gray-300 p-3"
-                onClick={() => {
+              <LastTd
+                handleEdit={() => {
                   setMembership(membership);
                   setShowModal(true);
                 }}
-              >
-                Editar
-              </td>
-              <td
-                className="cursor-pointer border-b border-gray-300 p-3"
-                onClick={() => {
+                handleDelete={() => {
                   setMembership(membership);
                   setShowDeleteModal(true);
                 }}
-              >
-                Eliminar
-              </td>
+              />
             </tr>
           ))}
         </Table>
@@ -352,24 +345,16 @@ function Consumptions({
                 <td className="border-b border-gray-300 p-3">
                   {consumption.points}
                 </td>
-                <td
-                  onClick={() => {
+                <LastTd
+                  handleEdit={() => {
                     setShowModal(true);
                     setConsumption(consumption);
                   }}
-                  className="cursor-pointer border-b border-gray-300 p-3"
-                >
-                  Editar
-                </td>
-                <td
-                  onClick={() => {
+                  handleDelete={() => {
                     setShowDeleteModal(true);
                     setConsumption(consumption);
                   }}
-                  className="cursor-pointer border-b border-gray-300 p-3"
-                >
-                  Eliminar
-                </td>
+                />
               </tr>
             ))}
           </Table>
@@ -577,15 +562,13 @@ function Promotions({
                 {promo.discount}%
               </td>
               <td className="border-b border-gray-300 p-3">{promo.points}</td>
-              <td
-                onClick={() => {
+              <LastTd
+                onlyDelete
+                handleDelete={() => {
                   setPromotion(promo);
                   setShowDeleteModal(true);
                 }}
-                className="cursor-pointer border-b border-gray-300 p-3"
-              >
-                Eliminar
-              </td>
+              />
             </tr>
           ))}
         </Table>
