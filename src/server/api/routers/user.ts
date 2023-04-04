@@ -21,21 +21,17 @@ export const userRouter = createTRPCRouter({
   getUserById: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input }) => {
-      try {
-        const user = await prisma.user.findUnique({
-          where: { id: input.id },
-        });
+      const user = await prisma.user.findUnique({
+        where: { id: input.id },
+      });
 
-        if (!user) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "User not found",
-          });
-        }
-        return { success: true, user };
-      } catch (err) {
-        console.log(err);
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
       }
+      return { success: true, user };
     }),
 
   getUser: publicProcedure

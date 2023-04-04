@@ -113,7 +113,11 @@ const UserDetail: NextPage<Props> = ({ id }) => {
 
           {consumptionActive === "Promociones" && (
             <section className="rounded-sm bg-white p-4">
-              <PromotionsList validPromotions={validPromotions} userId={id} />
+              <PromotionsList
+                validPromotions={validPromotions}
+                userId={id}
+                userTotalPoints={user.data.totalPoints}
+              />
             </section>
           )}
 
@@ -293,9 +297,11 @@ function ConsumptionsList({
 function PromotionsList({
   validPromotions,
   userId,
+  userTotalPoints,
 }: {
   validPromotions: Promotion[] | undefined;
   userId: string;
+  userTotalPoints: number;
 }) {
   const ctx = api.useContext();
   const { register, watch } = useForm<{ name: string }>();
@@ -327,6 +333,9 @@ function PromotionsList({
             `http://localhost:3000/api/socket/exchangePromotion`
           );
         },
+        onError: (err) => {
+          console.log(err);
+        },
       }
     );
   };
@@ -351,6 +360,7 @@ function PromotionsList({
               <p className="text-base">-{promo.points} pts</p>
             </div>
             <button
+              disabled={userTotalPoints - promo.points <= 0}
               type="button"
               onClick={() =>
                 handlePostPromotion(userId, promo.id, promo.points)

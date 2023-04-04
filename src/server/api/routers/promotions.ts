@@ -29,74 +29,71 @@ export const promotionRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input }) => {
-      try {
-        const userToUpdate = await prisma.user.findUnique({
-          where: { id: input.userId },
+      const userToUpdate = await prisma.user.findUnique({
+        where: { id: input.userId },
+      });
+
+      if (!userToUpdate) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      //CARGAR PROMO EN USUARIO
+      if (userToUpdate.totalPoints - input.points >= 0) {
+        await prisma.promotionOnUser.create({
+          data: {
+            promotionId: input.promotionId,
+            userId: input.userId,
+            quantity: Number(input.quantity),
+          },
         });
 
-        if (!userToUpdate) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "User not found",
-          });
-        }
+        const user = await prisma.user.update({
+          where: { id: input.userId },
+          data: {
+            totalPoints: {
+              decrement: Number(input.points),
+            },
+            totalPointsSpent: {
+              increment: Number(input.points),
+            },
+          },
+          include: { membership: true },
+        });
 
-        //CARGAR PROMO EN USUARIO
-        if (userToUpdate.totalPoints - input.points >= 0) {
-          await prisma.promotionOnUser.create({
-            data: {
-              promotionId: input.promotionId,
-              userId: input.userId,
-              quantity: Number(input.quantity),
+        // ACTUALIZAR MEMEBRESÍA SI ES NECESARIO
+        if (
+          user &&
+          user.membership?.maxPoints &&
+          user.totalPointsSpent > user.membership?.maxPoints
+        ) {
+          const membership = await prisma.membership.findFirst({
+            where: {
+              AND: [
+                { minPoints: { lte: user.totalPointsSpent } },
+                { maxPoints: { gt: user.totalPointsSpent } },
+              ],
             },
           });
 
-          const user = await prisma.user.update({
-            where: { id: input.userId },
-            data: {
-              totalPoints: {
-                decrement: Number(input.points),
-              },
-              totalPointsSpent: {
-                increment: Number(input.points),
-              },
-            },
-            include: { membership: true },
-          });
-
-          // ACTUALIZAR MEMEBRESÍA SI ES NECESARIO
-          if (
-            user &&
-            user.membership?.maxPoints &&
-            user.totalPointsSpent > user.membership?.maxPoints
-          ) {
-            const membership = await prisma.membership.findFirst({
-              where: {
-                AND: [
-                  { minPoints: { lte: user.totalPointsSpent } },
-                  { maxPoints: { gt: user.totalPointsSpent } },
-                ],
+          if (membership) {
+            await prisma.user.update({
+              where: { id: input.userId },
+              data: {
+                membership: { connect: { id: membership.id } },
               },
             });
-
-            if (membership) {
-              await prisma.user.update({
-                where: { id: input.userId },
-                data: {
-                  membership: { connect: { id: membership.id } },
-                },
-              });
-            }
           }
         }
-
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "El usuario no tiene suficientes puntos",
-        });
-      } catch (err) {
-        console.log(err);
+        return;
       }
+
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "El usuario no tiene suficientes puntos",
+      });
     }),
 
   deletePromotion: protectedProcedure
