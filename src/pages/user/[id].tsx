@@ -31,6 +31,8 @@ type Props = {
 type ConsumptionActive = "Bebida" | "Comida" | "Juego" | "Promociones";
 
 const UserDetail: NextPage<Props> = ({ id }) => {
+  const router = useRouter();
+
   const user = api.user.getUser.useQuery({
     id,
   });
@@ -77,7 +79,7 @@ const UserDetail: NextPage<Props> = ({ id }) => {
 
       <Nav />
 
-      <main className="min-h-screen bg-neutral-200 px-10">
+      <main className="min-h-screen bg-neutral-200 px-10 pb-10">
         <div className="mx-auto grid max-w-screen-xl gap-20">
           <section className="grid grid-cols-12 gap-10 pt-10">
             <section className="col-span-8 grid grid-cols-2 gap-2">
@@ -116,6 +118,15 @@ const UserDetail: NextPage<Props> = ({ id }) => {
               userConsumptionsGrouped={userConsumptionsGrouped.data}
             />
           </section>
+
+          <div className="flex justify-end">
+            <button
+              onClick={() => router.push("/")}
+              className="rounded bg-neutral-900 p-2 px-10 font-semibold text-neutral-100"
+            >
+              LISTO
+            </button>
+          </div>
         </div>
       </main>
     </div>
@@ -398,7 +409,7 @@ function TotalConsumptions({
 }) {
   return (
     <details className="rounded-sm bg-white p-4">
-      <summary className="cursor-pointer">Consumiciones totals:</summary>
+      <summary className="cursor-pointer">Consumiciones totales:</summary>
       <div className="grid grid-cols-3 gap-4 pt-4">
         {userConsumptionsGrouped.map((category) => (
           <div key={category.id} className="col-span-1">

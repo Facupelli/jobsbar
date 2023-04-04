@@ -1,4 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
+import BagIcon from "~/icons/BagIcon";
+import CardIcon from "~/icons/CardIcon";
+import PercentageIcon from "~/icons/PercentageIcon";
+import StatsUpIcon from "~/icons/StatsUpIcon";
+import UsersIcon from "~/icons/UsersIcon";
 import { Routes } from "~/pages/admin";
 
 type AdminLayoutProps = {
@@ -36,9 +41,15 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             route === "home" ? "rounded bg-green-500  text-neutral-900" : null
           }`}
         >
-          <button onClick={() => setRoute("home")} className="">
+          <button
+            onClick={() => setRoute("home")}
+            className="flex items-center gap-4"
+          >
             <div className="">
-              {/* <ChartPie size={22} active={route === "admin"} /> */}
+              <StatsUpIcon
+                size={22}
+                fill={route === "home" ? "#171717" : "#f5f5f5"}
+              />
             </div>
             <p>Inicio</p>
           </button>
@@ -51,9 +62,15 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
               : null
           }`}
         >
-          <button onClick={() => setRoute("memberships")} className="">
+          <button
+            onClick={() => setRoute("memberships")}
+            className="flex items-center gap-4"
+          >
             <div className="">
-              {/* <CardIcon size={22} active={route === "memberships"} /> */}
+              <CardIcon
+                size={22}
+                fill={route === "memberships" ? "#171717" : "#f5f5f5"}
+              />
             </div>
             <p>Membresías</p>
           </button>
@@ -66,9 +83,15 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
               : null
           }`}
         >
-          <button onClick={() => setRoute("consumptions")} className="">
+          <button
+            onClick={() => setRoute("consumptions")}
+            className="flex items-center gap-4"
+          >
             <div className="">
-              {/* <BasketIcon size={22} active={route === "consumptions"} /> */}
+              <BagIcon
+                size={22}
+                fill={route === "consumptions" ? "#171717" : "#f5f5f5"}
+              />
             </div>
             <p>Consumiciones</p>
           </button>
@@ -81,9 +104,15 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
               : null
           }`}
         >
-          <button onClick={() => setRoute("promotions")} className="">
+          <button
+            onClick={() => setRoute("promotions")}
+            className="flex items-center gap-4"
+          >
             <div className="">
-              {/* <PercentageIcon size={22} active={route === "promotions"} /> */}
+              <PercentageIcon
+                size={22}
+                fill={route === "promotions" ? "#171717" : "#f5f5f5"}
+              />
             </div>
             <p>Promociones</p>
           </button>
@@ -94,9 +123,15 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             route === "users" ? "rounded bg-green-500  text-neutral-900" : null
           }`}
         >
-          <button onClick={() => setRoute("users")} className="">
+          <button
+            onClick={() => setRoute("users")}
+            className="flex items-center gap-4"
+          >
             <div className="">
-              {/* <UsersIcon size={22} active={route === "users"} /> */}
+              <UsersIcon
+                size={22}
+                fill={route === "users" ? "#171717" : "#f5f5f5"}
+              />
             </div>
             <p>Usuarios</p>
           </button>
