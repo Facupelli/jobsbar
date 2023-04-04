@@ -26,6 +26,7 @@ import type {
   CreatePromotion,
   CreateUser,
 } from "~/types/admin";
+import DeleteModal from "~/components/DeleteModal";
 
 export type Routes =
   | "home"
@@ -90,11 +91,35 @@ export default function Admin() {
 }
 
 function Memberships({ memberships }: { memberships: Membership[] }) {
+  const ctx = api.useContext();
+
   const [membership, setMembership] = useState<Membership | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const { mutate } = api.membership.deleteMembershipById.useMutation();
+
+  const handleDelete = (membershipId: string) => {
+    mutate(
+      { id: membershipId },
+      {
+        onSuccess: () => {
+          setShowDeleteModal(false);
+          ctx.membership.getAllMemberships.invalidate();
+        },
+      }
+    );
+  };
   return (
     <>
+      {showDeleteModal && membership && (
+        <Modal
+          isOpen={showDeleteModal}
+          handleCloseModal={() => setShowDeleteModal(false)}
+        >
+          <DeleteModal handleDelete={handleDelete} id={membership.id} />
+        </Modal>
+      )}
       {showModal && (
         <Modal isOpen={showModal} handleCloseModal={() => setShowModal(false)}>
           <CreateMembership
@@ -138,7 +163,15 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
               >
                 Editar
               </td>
-              <td className="border-b border-gray-300 p-3">Eliminar</td>
+              <td
+                className="cursor-pointer border-b border-gray-300 p-3"
+                onClick={() => {
+                  setMembership(membership);
+                  setShowDeleteModal(true);
+                }}
+              >
+                Eliminar
+              </td>
             </tr>
           ))}
         </Table>
