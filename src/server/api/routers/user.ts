@@ -11,7 +11,7 @@ import { fetchUserConsumptionsByCategories } from "~/utils/admin";
 
 export const userRouter = createTRPCRouter({
   getAllUsers: protectedProcedure.query(async () => {
-    const allUsers = await prisma.user.findMany({});
+    const allUsers = await prisma.user.findMany();
 
     const usersCount = await prisma.user.count();
 
@@ -64,6 +64,57 @@ export const userRouter = createTRPCRouter({
       } catch (err) {
         console.log(err);
       }
+    }),
+
+  getUserLastConsumptions: protectedProcedure
+    .input(z.object({ id: z.string(), take: z.number(), skip: z.number() }))
+    .query(async ({ input }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: input.id },
+        include: {
+          consumptions: {
+            include: {
+              consumption: { include: { consumptionCategory: true } },
+            },
+            orderBy: { createdAt: "desc" },
+            take: input.take,
+            skip: input.skip,
+          },
+        },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      return user;
+    }),
+
+  getTotalUserConsumptions: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: input.id },
+        include: {
+          consumptions: {
+            include: {
+              consumption: { include: { consumptionCategory: true } },
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      return user.consumptions.length;
     }),
 
   getUserConsumptionsGrouped: publicProcedure

@@ -25,6 +25,8 @@ import type { Promotion, User } from "~/types/model";
 import type { Membership } from "~/types/model";
 import type { ConsumptionOnUser } from "~/types/model";
 import axios from "axios";
+import { usePagination } from "~/hooks/usePagination";
+import Pagination from "~/components/Pagination";
 
 type Props = {
   id: string;
@@ -122,7 +124,12 @@ const UserDetail: NextPage<Props> = ({ id }) => {
           )}
 
           <section>
-            <LastConsumptions userConsumptions={user.data.consumptions} />
+            <LastConsumptions
+              userConsumptions={user.data.consumptions}
+              userId={id}
+              // setTake={setTakeLastConsumptions}
+              // setSkip={setSkipLastConsumptions}
+            />
           </section>
 
           <section>
@@ -378,10 +385,25 @@ function PromotionsList({
 
 function LastConsumptions({
   userConsumptions,
-}: {
+  userId,
+}: // setTake,
+// setSkip,
+{
   userConsumptions: ConsumptionOnUser[];
+  userId: string;
+  // setTake: Dispatch<SetStateAction<number>>;
+  // setSkip: Dispatch<SetStateAction<number>>;
 }) {
   const ctx = api.useContext();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalCount = api.user.getTotalUserConsumptions.useQuery({ id: userId });
+  const userLastConsumptions = api.user.getUserLastConsumptions.useQuery({
+    id: userId,
+    take: 10,
+    skip: (currentPage - 1) * 10,
+  });
+
   const { mutate } = api.user.updateGameStatus.useMutation();
   const handleUpdateGameStatus = (
     id: string,
@@ -403,12 +425,14 @@ function LastConsumptions({
     );
   };
 
+  if (!userLastConsumptions.data) return <div>404</div>;
+
   return (
     <details className="rounded-sm bg-white p-4">
       <summary className="cursor-pointer">Últimas consumiciones:</summary>
       <div className="pt-4">
         <Table trTitles={["consumición", "ganó?", "cantidad", "fecha"]}>
-          {userConsumptions.slice(0, 10).map((consumption) => (
+          {userLastConsumptions.data.consumptions.map((consumption) => (
             <tr key={consumption.id}>
               <td className="border-b border-gray-300 p-3">
                 {consumption.consumption?.name}
@@ -467,6 +491,15 @@ function LastConsumptions({
             </tr>
           ))}
         </Table>
+
+        {totalCount.data && (
+          <Pagination
+            currentPage={currentPage}
+            totalCount={totalCount.data}
+            pageSize={10}
+            onPageChange={(page) => setCurrentPage(page as number)}
+          />
+        )}
       </div>
     </details>
   );
