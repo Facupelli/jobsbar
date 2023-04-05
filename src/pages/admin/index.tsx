@@ -369,7 +369,7 @@ function Consumptions({
                 key={category.id}
                 className={`p-2 sm:p-4 ${
                   active === category.name
-                    ? "border-b-[5px] border-green-500 font-semibold sm:border-r-[6px]"
+                    ? "border-b-[5px] border-green-500 font-semibold sm:border-b-0 sm:border-r-[6px]"
                     : ""
                 }`}
               >
