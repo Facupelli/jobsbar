@@ -1,9 +1,4 @@
 import { prisma } from "~/server/db";
-import {
-  ConsumptionsGrouped,
-  UserConsumptionsGrouped,
-} from "~/types/consumptionsByCategory";
-import { Consumption } from "~/types/model";
 
 export const fetchAllConsumptionsByCategories = async () => {
   return await prisma.consumptionCategory.findMany({
@@ -79,7 +74,7 @@ export const fetchAllPromotions = async () => {
 export const getConsumptionsReducedQuantity = (
   consumptions: {
     name: string;
-    users: { userId: String; quantity: number }[];
+    users: { userId: string; quantity: number }[];
   }[]
 ) => {
   return consumptions.map((consumption) => ({

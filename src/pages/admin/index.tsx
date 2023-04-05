@@ -5,7 +5,7 @@ import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import superjason from "superjson";
 import { type GetServerSideProps } from "next";
 import { getServerSession } from "next-auth";
-import { Dispatch, SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { authOptions } from "~/server/auth";
 import { prisma } from "~/server/db";
 import { appRouter } from "~/server/api/root";
@@ -15,9 +15,12 @@ import AdminLayout from "~/components/Admin/AdminLayout";
 import Nav from "~/components/Nav";
 import Table from "~/components/Table";
 import Modal from "~/components/Modal";
+import DeleteModal from "~/components/DeleteModal";
+import LastTd from "~/components/Admin/LastTD";
+import Pagination from "~/components/Pagination";
 
 import type { ConsumptionsGrouped } from "~/types/consumptionsByCategory";
-import type { Consumption, Membership, Promotion, User } from "~/types/model";
+import type { Consumption, Membership } from "~/types/model";
 import type {
   Active,
   AdminPromotion,
@@ -26,9 +29,6 @@ import type {
   CreatePromotion,
   CreateUser,
 } from "~/types/admin";
-import DeleteModal from "~/components/DeleteModal";
-import LastTd from "~/components/Admin/LastTD";
-import Pagination from "~/components/Pagination";
 
 export type Routes =
   | "home"
@@ -167,7 +167,7 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
       {
         onSuccess: () => {
           setShowDeleteModal(false);
-          ctx.membership.getAllMemberships.invalidate();
+          void ctx.membership.getAllMemberships.invalidate();
         },
       }
     );
@@ -255,7 +255,7 @@ function CreateMembership({
         {
           onSuccess: () => {
             setShowModal(false);
-            ctx.membership.getAllMemberships.invalidate();
+            void ctx.membership.getAllMemberships.invalidate();
           },
         }
       );
@@ -263,13 +263,13 @@ function CreateMembership({
     return createMembership.mutate(data, {
       onSuccess: () => {
         setShowModal(false);
-        ctx.membership.getAllMemberships.invalidate();
+        void ctx.membership.getAllMemberships.invalidate();
       },
     });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+    <form onSubmit={void handleSubmit(onSubmit)} className="grid gap-4">
       <div className="grid gap-1">
         <label htmlFor="name">Nombre:</label>
         <input
@@ -335,7 +335,7 @@ function Consumptions({
       {
         onSuccess: () => {
           setShowDeleteModal(false);
-          ctx.consumptions.getConsumptionsGrouped.invalidate();
+          void ctx.consumptions.getConsumptionsGrouped.invalidate();
         },
       }
     );
@@ -454,7 +454,7 @@ function CreateConsumption({
         {
           onSuccess: () => {
             setShowModal(false);
-            ctx.consumptions.getConsumptionsGrouped.invalidate();
+            void ctx.consumptions.getConsumptionsGrouped.invalidate();
           },
         }
       );
@@ -462,13 +462,13 @@ function CreateConsumption({
     return createConsumption.mutate(data, {
       onSuccess: () => {
         setShowModal(false);
-        ctx.consumptions.getConsumptionsGrouped.invalidate();
+        void ctx.consumptions.getConsumptionsGrouped.invalidate();
       },
     });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+    <form onSubmit={void handleSubmit(onSubmit)} className="grid gap-4">
       <div className="grid gap-1">
         <label>Tipo:</label>
         <select
@@ -532,7 +532,7 @@ function Promotions({
       { id },
       {
         onSuccess: () => {
-          ctx.promotions.getAllPromotions.invalidate();
+          void ctx.promotions.getAllPromotions.invalidate();
           setShowDeleteModal(false);
         },
       }
@@ -668,14 +668,14 @@ function CreatePromotion({
       {
         onSuccess: () => {
           setShowModal(false);
-          ctx.promotions.getAllPromotions.invalidate();
+          void ctx.promotions.getAllPromotions.invalidate();
         },
       }
     );
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+    <form onSubmit={void handleSubmit(onSubmit)} className="grid gap-4">
       <h4>CREAR PROMOCIÓN</h4>
 
       <div className="grid gap-1">
@@ -818,12 +818,12 @@ function CreateUser({
     mutate(data, {
       onSuccess: () => {
         setShowModal(false);
-        ctx.user.getAllUsers.invalidate();
+        void ctx.user.getAllUsers.invalidate();
       },
     });
   };
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+    <form onSubmit={void handleSubmit(onSubmit)} className="grid gap-4">
       <div className="grid gap-1">
         <label htmlFor="name">Nombre y Apellido:</label>
         <input

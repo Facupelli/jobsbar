@@ -7,7 +7,7 @@ export type ConsumptionsGrouped = {
 export type UserConsumptionsGrouped = {
   consumptions: {
     name: string;
-    users: { userId: String; quantity: number }[];
+    users: { userId: string; quantity: number }[];
   }[];
   id: string;
   name: string;

@@ -1,13 +1,13 @@
 import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useEffect } from "react";
-import { ConsumptionActive } from "~/types/admin";
+import { type Dispatch, type SetStateAction, useEffect, useMemo } from "react";
+import type { ConsumptionActive } from "~/types/admin";
 
-type ConsumptionState = {
-  drinks: boolean;
-  foods: boolean;
-  games: boolean;
-  promos: boolean;
-};
+// type ConsumptionState = {
+//   drinks: boolean;
+//   foods: boolean;
+//   games: boolean;
+//   promos: boolean;
+// };
 
 type KeyMap = {
   [key: string]: string;
@@ -19,19 +19,22 @@ export const useUserIdHotkeys = (
 ) => {
   const router = useRouter();
 
-  const keyMap: KeyMap = {
-    "1": "Bebida",
-    "2": "Comida",
-    "3": "Juego",
-    "4": "Promociones",
-  };
+  const keyMap: KeyMap = useMemo(
+    () => ({
+      "1": "Bebida",
+      "2": "Comida",
+      "3": "Juego",
+      "4": "Promociones",
+    }),
+    []
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
 
       if (e.key === "Enter") {
-        router.push("/");
+        void router.push("/");
       }
 
       if (e.key === "4") {

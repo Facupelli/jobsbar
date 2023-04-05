@@ -1,5 +1,3 @@
-import type { Membership } from "~/types/model";
-
 export default function DeleteModal({
   handleDelete,
   id,

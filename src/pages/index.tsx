@@ -38,7 +38,7 @@ function LoginInput() {
   const {
     register,
     watch,
-    formState: { errors },
+    // formState: { errors },
     setFocus,
     reset,
     setValue,
@@ -52,13 +52,13 @@ function LoginInput() {
   const { mutate } = api.user.getUserById.useMutation();
 
   const onSubmit = useCallback(
-    async (id: string) => {
+    (id: string) => {
       mutate(
         { id },
         {
           onSuccess: (data) => {
             if (data?.success) {
-              router.push(`/user/${id}`);
+              void router.push(`/user/${id}`);
             }
             reset({ id: "" });
           },
@@ -70,7 +70,7 @@ function LoginInput() {
         }
       );
     },
-    [reset, router, setValue]
+    [reset, router, setValue, mutate]
   );
 
   useEffect(() => {

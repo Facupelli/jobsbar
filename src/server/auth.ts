@@ -3,6 +3,7 @@ import {
   getServerSession,
   type NextAuthOptions,
   type DefaultSession,
+  type Session,
 } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -16,7 +17,7 @@ import { prisma } from "~/server/db";
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 declare module "next-auth" {
-  interface Session extends DefaultSession {
+  interface Session {
     user: {
       id: string;
       // ...other properties
@@ -38,16 +39,18 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, user }) {
+      const ses = session as Session;
+
       const dbUser = await prisma.user.findUnique({
         where: { email: user.email },
         include: { role: true },
       });
-      if (session.user && dbUser) {
-        session.user.id = user.id;
-        session.user.role = dbUser.role?.name;
+      if (session.user && dbUser?.role) {
+        ses.user.id = user.id;
+        ses.user.role = dbUser.role?.name;
         // session.user.role = user.role; <-- put other properties on the session here
       }
-      return session;
+      return ses;
     },
   },
   adapter: PrismaAdapter(prisma),

@@ -7,10 +7,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
-import {
-  fetchAllConsumptionsByCategories,
-  fetchAllPromotions,
-} from "~/utils/admin";
+import { fetchAllPromotions } from "~/utils/admin";
 
 export const promotionRouter = createTRPCRouter({
   getAllPromotions: protectedProcedure.query(async () => {

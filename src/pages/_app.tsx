@@ -8,7 +8,7 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 
-let didInit: boolean = false;
+let didInit = false;
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -22,7 +22,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
     if (!didInit) {
       didInit = true;
 
-      initializeSocket();
+      void initializeSocket();
     }
   }, []);
 

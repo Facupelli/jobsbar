@@ -1,10 +1,15 @@
-import { NextApiRequest } from "next";
-import { NextApiResponseServerIO } from "~/types/next";
+import { type NextApiRequest } from "next";
+import { type NextApiResponseServerIO } from "~/types/next";
+
+type Body = {
+  id: string;
+};
 
 const gameOver = (req: NextApiRequest, res: NextApiResponseServerIO) => {
   if (req.method === "POST") {
+    const body = req.body as Body;
     // get message
-    const { id }: { id: string } = req.body;
+    const { id } = body;
     // dispatch to channel "message"
     res?.socket?.server?.io?.emit("gameOver", { id });
 

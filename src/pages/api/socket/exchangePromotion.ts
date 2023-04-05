@@ -1,5 +1,5 @@
-import { NextApiRequest } from "next";
-import { NextApiResponseServerIO } from "~/types/next";
+import { type NextApiRequest } from "next";
+import { type NextApiResponseServerIO } from "~/types/next";
 
 const exchangePromotion = (
   req: NextApiRequest,

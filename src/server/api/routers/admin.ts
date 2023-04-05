@@ -1,16 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
-import {
-  fetchAllConsumptionsByCategories,
-  getConsumptionsReducedQuantity,
-} from "~/utils/admin";
 
 export const adminRouter = createTRPCRouter({
   getMostPopularConsumptions: protectedProcedure.query(async () => {

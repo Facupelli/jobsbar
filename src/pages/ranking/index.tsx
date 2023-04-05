@@ -1,21 +1,21 @@
-import { GetServerSideProps } from "next";
+import { type GetServerSideProps } from "next";
 import Head from "next/head";
 import React, { useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
+import { api } from "~/utils/api";
+import { prisma } from "~/server/db";
 
-import {
-  ClientToServerEvents,
-  GameOver,
-  ServerToClientEvents,
-} from "../../types/socketio";
-
-import type { Consumption } from "~/types/model";
-import { toggleFullScreen } from "~/utils/fullScreen";
 import Nav from "~/components/Nav";
 import Table from "~/components/Table";
-import { prisma } from "~/server/db";
-import { UsersRanking } from "~/types/ranking";
-import { api } from "~/utils/api";
+
+import { toggleFullScreen } from "~/utils/fullScreen";
+
+import type {
+  ClientToServerEvents,
+  // GameOver,
+  ServerToClientEvents,
+} from "../../types/socketio";
+import type { Consumption } from "~/types/model";
 
 type Props = {
   allGames: Consumption[];
@@ -48,12 +48,12 @@ export default function Ranking({ allGames }: Props) {
       // setConnected(true);
     });
 
-    socket.on("gameOver", async (data: GameOver) => {
-      ctx.ranking.getGameRankingById.invalidate();
+    socket.on("gameOver", () => {
+      void ctx.ranking.getGameRankingById.invalidate();
     });
 
     if (socket) return () => socket.disconnect();
-  }, []);
+  }, [ctx.ranking.getGameRankingById]);
 
   useEffect(() => {
     const getFullScreenMode = () => {
@@ -84,7 +84,7 @@ export default function Ranking({ allGames }: Props) {
 
       <main className="min-h-screen  bg-neutral-200 px-10">
         <h1 className="pt-6 font-light">Elige un ranking:</h1>
-        <ul className="flex gap-4 py-6">
+        <ul className="flex gap-2 py-6">
           {allGames.map((game) => (
             <li
               key={game.id}
@@ -96,7 +96,7 @@ export default function Ranking({ allGames }: Props) {
                 gameActive?.name === game.name
                   ? "bg-neutral-900 text-neutral-100"
                   : "bg-green-500 text-neutral-900"
-              }  p-2 px-6 font-semibold`}
+              }  px-4 py-0 font-semibold`}
             >
               {game.name}
             </li>
@@ -129,7 +129,7 @@ export default function Ranking({ allGames }: Props) {
         <div className="flex justify-end">
           <button
             type="submit"
-            onClick={() => toggleFullScreen(divRef)}
+            onClick={() => void toggleFullScreen(divRef)}
             className="rounded bg-neutral-900 p-2 text-neutral-100"
           >
             Pantalla Completa
@@ -140,7 +140,7 @@ export default function Ranking({ allGames }: Props) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const allGames = await prisma.consumption.findMany({
     where: { consumptionCategoryId: "cleubcq1e0005e788cizbtne3" },
   });

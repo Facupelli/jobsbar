@@ -4,7 +4,7 @@ import CardIcon from "~/icons/CardIcon";
 import PercentageIcon from "~/icons/PercentageIcon";
 import StatsUpIcon from "~/icons/StatsUpIcon";
 import UsersIcon from "~/icons/UsersIcon";
-import { Routes } from "~/pages/admin";
+import { type Routes } from "~/pages/admin";
 
 type AdminLayoutProps = {
   children: React.ReactNode;
@@ -38,7 +38,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
       <ul className="grid gap-4 p-4">
         <li
           className={`p-2 ${
-            route === "home" ? "rounded bg-green-500  text-neutral-900" : null
+            route === "home" ? "rounded bg-green-500  text-neutral-900" : ""
           }`}
         >
           <button
@@ -59,7 +59,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
           className={`p-2 ${
             route === "memberships"
               ? "rounded bg-green-500  text-neutral-900"
-              : null
+              : ""
           }`}
         >
           <button
@@ -80,7 +80,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
           className={`p-2 ${
             route === "consumptions"
               ? "rounded bg-green-500  text-neutral-900"
-              : null
+              : ""
           }`}
         >
           <button
@@ -101,7 +101,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
           className={`p-2 ${
             route === "promotions"
               ? "rounded bg-green-500  text-neutral-900"
-              : null
+              : ""
           }`}
         >
           <button
@@ -120,7 +120,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
 
         <li
           className={`p-2 ${
-            route === "users" ? "rounded bg-green-500  text-neutral-900" : null
+            route === "users" ? "rounded bg-green-500 text-neutral-900" : ""
           }`}
         >
           <button

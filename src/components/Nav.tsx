@@ -16,7 +16,7 @@ export default function Nav({ route }: Props) {
     >
       <ul className="flex h-[70px] items-center justify-end gap-8">
         {session && (
-          <li className="cursor-pointer" onClick={async () => await signOut()}>
+          <li className="cursor-pointer" onClick={() => void signOut()}>
             SALIR
           </li>
         )}
@@ -36,10 +36,7 @@ export default function Nav({ route }: Props) {
         )}
 
         {!session && (
-          <li
-            className="cursor-pointer"
-            onClick={async () => await signIn("google")}
-          >
+          <li className="cursor-pointer" onClick={() => void signIn("google")}>
             ENTRAR
           </li>
         )}

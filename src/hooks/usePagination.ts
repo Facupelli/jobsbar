@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import { api } from "~/utils/api";
+import { useMemo } from "react";
 
 type Props = {
   totalCount: number;
@@ -10,7 +9,7 @@ type Props = {
 export const DOTS = "...";
 
 const range = (start: number, end: number) => {
-  let length = end - start + 1;
+  const length = end - start + 1;
   return Array.from({ length }, (_, idx) => idx + start);
 };
 
@@ -57,8 +56,8 @@ export const usePagination = ({
             Case 2: No left dots to show, but rights dots to be shown
         */
     if (!shouldShowLeftDots && shouldShowRightDots) {
-      let leftItemCount = 3 + 2 * siblingCount;
-      let leftRange = range(1, leftItemCount);
+      const leftItemCount = 3 + 2 * siblingCount;
+      const leftRange = range(1, leftItemCount);
 
       return [...leftRange, DOTS, totalPageCount];
     }
@@ -67,8 +66,8 @@ export const usePagination = ({
             Case 3: No right dots to show, but left dots to be shown
         */
     if (shouldShowLeftDots && !shouldShowRightDots) {
-      let rightItemCount = 3 + 2 * siblingCount;
-      let rightRange = range(
+      const rightItemCount = 3 + 2 * siblingCount;
+      const rightRange = range(
         totalPageCount - rightItemCount + 1,
         totalPageCount
       );
@@ -79,7 +78,7 @@ export const usePagination = ({
             Case 4: Both left and right dots to be shown
         */
     if (shouldShowLeftDots && shouldShowRightDots) {
-      let middleRange = range(leftSiblingIndex, rightSiblingIndex);
+      const middleRange = range(leftSiblingIndex, rightSiblingIndex);
       return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
     }
   }, [totalCount, pageSize, siblingCount, currentPage]);

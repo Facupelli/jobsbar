@@ -1,10 +1,15 @@
-import { NextApiRequest } from "next";
-import { NextApiResponseServerIO } from "~/types/next";
+import { type NextApiRequest } from "next";
+import { type NextApiResponseServerIO } from "~/types/next";
+
+type Body = {
+  consumptionType: string;
+};
 
 const postConsumption = (req: NextApiRequest, res: NextApiResponseServerIO) => {
   if (req.method === "POST") {
+    const body = req.body as Body;
     // get message
-    const { consumptionType }: { consumptionType: string } = req.body;
+    const { consumptionType } = body;
 
     // dispatch to channel "message"
     res?.socket?.server?.io?.emit("addConsumption", { consumptionType });

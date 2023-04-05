@@ -1,10 +1,11 @@
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import superjason from "superjson";
-import { GetStaticProps, NextPage } from "next";
+import { type GetStaticProps, type NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
@@ -13,6 +14,7 @@ import Table from "~/components/Table";
 import Modal from "~/components/Modal";
 import Nav from "~/components/Nav";
 import SearchInput from "~/components/SearchInput";
+import Pagination from "~/components/Pagination";
 
 import { useUserIdHotkeys } from "~/hooks/useUserIdHotkeys";
 
@@ -24,9 +26,6 @@ import type {
 import type { Promotion, User } from "~/types/model";
 import type { Membership } from "~/types/model";
 import type { ConsumptionOnUser } from "~/types/model";
-import axios from "axios";
-import { usePagination } from "~/hooks/usePagination";
-import Pagination from "~/components/Pagination";
 
 type Props = {
   id: string;
@@ -125,7 +124,6 @@ const UserDetail: NextPage<Props> = ({ id }) => {
 
           <section>
             <LastConsumptions
-              userConsumptions={user.data.consumptions}
               userId={id}
               // setTake={setTakeLastConsumptions}
               // setSkip={setSkipLastConsumptions}
@@ -140,7 +138,7 @@ const UserDetail: NextPage<Props> = ({ id }) => {
 
           <div className="flex justify-end">
             <button
-              onClick={() => router.push("/")}
+              onClick={() => void router.push("/")}
               className="rounded bg-neutral-900 p-2 px-10 font-semibold text-neutral-100"
             >
               LISTO
@@ -253,12 +251,12 @@ function ConsumptionsList({
     mutate(
       { userId, consumptionId, points, quantity: 1 },
       {
-        onSuccess: async () => {
-          ctx.user.getUserConsumptionsGrouped.invalidate();
-          ctx.user.getUser.invalidate();
+        onSuccess: () => {
+          void ctx.user.getUserConsumptionsGrouped.invalidate();
+          void ctx.user.getUser.invalidate();
 
           //post al scoket
-          await axios.post(`http://localhost:3000/api/socket/postConsumption`, {
+          void axios.post(`http://localhost:3000/api/socket/postConsumption`, {
             consumptionType: name,
           });
         },
@@ -332,13 +330,11 @@ function PromotionsList({
     mutate(
       { userId, promotionId, points, quantity: 1 },
       {
-        onSuccess: async () => {
-          ctx.user.getUser.invalidate();
+        onSuccess: () => {
+          void ctx.user.getUser.invalidate();
 
           //post al socket
-          await axios.post(
-            `http://localhost:3000/api/socket/exchangePromotion`
-          );
+          void axios.post(`http://localhost:3000/api/socket/exchangePromotion`);
         },
         onError: (err) => {
           console.log(err);
@@ -383,17 +379,7 @@ function PromotionsList({
   );
 }
 
-function LastConsumptions({
-  userConsumptions,
-  userId,
-}: // setTake,
-// setSkip,
-{
-  userConsumptions: ConsumptionOnUser[];
-  userId: string;
-  // setTake: Dispatch<SetStateAction<number>>;
-  // setSkip: Dispatch<SetStateAction<number>>;
-}) {
+function LastConsumptions({ userId }: { userId: string }) {
   const ctx = api.useContext();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -415,11 +401,11 @@ function LastConsumptions({
     mutate(
       { id, winner: status },
       {
-        onSuccess: async () => {
-          ctx.user.getUser.invalidate();
+        onSuccess: () => {
+          void ctx.user.getUser.invalidate();
 
           // post al socket
-          await axios.post(`http://localhost:3000/api/socket/gameOver`, {
+          void axios.post(`http://localhost:3000/api/socket/gameOver`, {
             id: gameId,
           });
         },

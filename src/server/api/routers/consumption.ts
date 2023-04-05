@@ -10,7 +10,7 @@ import { prisma } from "~/server/db";
 import { fetchAllConsumptionsByCategories } from "~/utils/admin";
 
 export const consumptionRouter = createTRPCRouter({
-  getConsumptionsGrouped: publicProcedure.query(async ({ input }) => {
+  getConsumptionsGrouped: publicProcedure.query(async () => {
     try {
       const consumptions = await fetchAllConsumptionsByCategories();
 

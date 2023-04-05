@@ -30,8 +30,8 @@ export default function Pagination({
     return null;
   }
 
-  let lastPage = paginationRange[paginationRange.length - 1];
-  let firstPage = paginationRange[0];
+  const lastPage = paginationRange[paginationRange.length - 1];
+  const firstPage = paginationRange[0];
 
   const onNext = () => {
     if (lastPage === currentPage) return;

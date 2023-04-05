@@ -1,4 +1,4 @@
-import { UseFormRegister } from "react-hook-form";
+import { type UseFormRegister } from "react-hook-form";
 import SearchIcon from "~/icons/SearchIcon";
 
 export default function SearchInput({
