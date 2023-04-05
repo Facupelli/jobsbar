@@ -20,7 +20,7 @@ export default function AdminLayout({
   return (
     <div className="flex gap-2">
       <AdminNav route={route} setRoute={setRoute} />
-      <div className="mt-[140px] w-full max-w-screen-2xl p-6 sm:ml-[220px] sm:mt-[70px]">
+      <div className="mt-[140px] w-full max-w-screen-2xl sm:ml-[220px] sm:mt-[70px] sm:p-6">
         {children}
       </div>
     </div>
@@ -34,8 +34,8 @@ type AdminNavProps = {
 
 function AdminNav({ route, setRoute }: AdminNavProps) {
   return (
-    <nav className="fixed top-[70px] w-full bg-neutral-900 font-semibold text-gray-200 shadow-md sm:h-[calc(100vh_-_70px)] sm:w-[220px]">
-      <ul className="flex gap-4 overflow-x-auto px-6 py-2 text-sm sm:grid sm:p-4 sm:px-0 sm:text-base">
+    <nav className="fixed top-[70px] h-[55px] w-full bg-neutral-900 font-semibold text-gray-200 shadow-md sm:h-[calc(100vh_-_70px)] sm:w-[220px]">
+      <ul className="flex gap-4 overflow-x-auto px-6 py-2 text-sm sm:grid sm:p-4 sm:text-base">
         <li
           className={`p-2 ${
             route === "home" ? "rounded bg-green-500  text-neutral-900" : ""

@@ -17,7 +17,7 @@ export default function Modal({
     <>
       <dialog
         open={isOpen}
-        className={`fixed left-1/2 top-1/2 z-30 min-w-[500px] -translate-x-1/2 -translate-y-1/2 rounded p-8 shadow-lg  ${
+        className={`fixed left-1/2 top-1/2 z-30 min-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded p-8 shadow-lg sm:min-w-[500px]  ${
           error ? "border border-red-600 shadow-none" : ""
         }`}
       >

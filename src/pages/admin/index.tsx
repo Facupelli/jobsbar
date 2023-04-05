@@ -96,7 +96,7 @@ function Home() {
     return <div>404</div>;
 
   return (
-    <section className="grid gap-10">
+    <section className="grid gap-10 p-4 sm:p-0">
       {mostPopularConsumptions.data.map((category) => (
         <div key={category.id}>
           <h1 className="p-2 text-lg font-semibold">
@@ -190,7 +190,7 @@ function Memberships({ memberships }: { memberships: Membership[] }) {
           />
         </Modal>
       )}
-      <section>
+      <section className="p-4 sm:p-0">
         <div className="flex items-center justify-between pb-6">
           <h1 className="p-3 text-lg font-semibold">Membresías</h1>
           <button
@@ -361,15 +361,15 @@ function Consumptions({
           />
         </Modal>
       )}
-      <section className="gap-10">
-        <nav className="fixed left-[220px] top-[70px] h-[calc(100vh_-_70px)] w-[120px] bg-neutral-800">
-          <ul className="grid gap-4 text-neutral-100">
+      <section className="gap-10 ">
+        <nav className="fixed top-[125px] w-full bg-neutral-800 sm:left-[220px] sm:top-[70px] sm:h-[calc(100vh_-_70px)] sm:w-[120px]">
+          <ul className="flex gap-4 px-6 text-neutral-100 sm:grid sm:px-0">
             {consumptions.map((category) => (
               <li
                 key={category.id}
-                className={`p-4 ${
+                className={`p-2 sm:p-4 ${
                   active === category.name
-                    ? "border-r-[6px] border-green-500 font-semibold"
+                    ? "border-b-[5px] border-green-500 font-semibold sm:border-r-[6px]"
                     : ""
                 }`}
               >
@@ -383,7 +383,7 @@ function Consumptions({
             ))}
           </ul>
         </nav>
-        <div className="ml-[120px]">
+        <div className="mt-[55px] px-4 sm:ml-[120px] sm:pt-0">
           <div className="flex items-center justify-between pb-6">
             <h1 className="p-3 text-lg font-semibold">{active}</h1>
             <button
@@ -558,7 +558,7 @@ function Promotions({
           />
         </Modal>
       )}
-      <section>
+      <section className="p-4 sm:p-0">
         <div className="flex items-center justify-between pb-6">
           <h1 className="p-3 text-lg font-semibold">Promociones</h1>
           <button
@@ -772,7 +772,7 @@ function Users() {
         </Modal>
       )}
 
-      <section>
+      <section className="p-4 sm:p-0">
         <div className="flex items-center justify-between pb-6">
           <h1 className="p-3 text-lg font-semibold">Usuarios</h1>
           <button
