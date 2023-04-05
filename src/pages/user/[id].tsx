@@ -397,11 +397,13 @@ function LastConsumptions({
   const ctx = api.useContext();
   const [currentPage, setCurrentPage] = useState(1);
 
+  const pageSize = 10;
+
   const totalCount = api.user.getTotalUserConsumptions.useQuery({ id: userId });
   const userLastConsumptions = api.user.getUserLastConsumptions.useQuery({
     id: userId,
-    take: 10,
-    skip: (currentPage - 1) * 10,
+    take: pageSize,
+    skip: (currentPage - 1) * pageSize,
   });
 
   const { mutate } = api.user.updateGameStatus.useMutation();
@@ -496,7 +498,7 @@ function LastConsumptions({
           <Pagination
             currentPage={currentPage}
             totalCount={totalCount.data}
-            pageSize={10}
+            pageSize={pageSize}
             onPageChange={(page) => setCurrentPage(page as number)}
           />
         )}

@@ -30,43 +30,48 @@ export default function Pagination({
     return null;
   }
 
+  let lastPage = paginationRange[paginationRange.length - 1];
+  let firstPage = paginationRange[0];
+
   const onNext = () => {
+    if (lastPage === currentPage) return;
     onPageChange(currentPage + 1);
-    console.log("click");
   };
 
   const onPrevious = () => {
+    if (firstPage === currentPage) return;
     onPageChange(currentPage - 1);
   };
 
-  let lastPage = paginationRange[paginationRange.length - 1];
   return (
-    <ul className="mt-6 flex items-center justify-center gap-2">
-      <li className="cursor-pointer" onClick={onPrevious}>
+    <ul className="mt-6 flex items-center justify-center font-medium text-neutral-800 ">
+      <button className="cursor-pointer " onClick={onPrevious}>
         <NavArrowLeftIcon size={20} fill={"#171717"} />
-      </li>
-      {paginationRange.map((pageNumber) => {
-        if (pageNumber === DOTS) {
+      </button>
+      <div className="flex">
+        {paginationRange.map((pageNumber) => {
+          if (pageNumber === DOTS) {
+            return (
+              <li key={pageNumber} className="cursor-pointer ">
+                &#8230;
+              </li>
+            );
+          }
+
           return (
-            <li key={pageNumber} className="cursor-pointer">
-              &#8230;
+            <li
+              key={pageNumber}
+              className=" cursor-pointer border-r border-neutral-300 px-2 last:border-none"
+              onClick={() => onPageChange(pageNumber)}
+            >
+              {pageNumber}
             </li>
           );
-        }
-
-        return (
-          <li
-            key={pageNumber}
-            className=" cursor-pointer"
-            onClick={() => onPageChange(pageNumber)}
-          >
-            {pageNumber}
-          </li>
-        );
-      })}
-      <li className="cursor-pointer" onClick={onNext}>
+        })}
+      </div>
+      <button className="cursor-pointer" onClick={onNext}>
         <NavArrowRightIcon size={20} fill={"#171717"} />
-      </li>
+      </button>
     </ul>
   );
 }
