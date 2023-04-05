@@ -16,6 +16,7 @@ export const userRouter = createTRPCRouter({
       const allUsers = await prisma.user.findMany({
         take: input.take,
         skip: input.skip,
+        orderBy: { name: "asc" },
       });
 
       const usersCount = await prisma.user.count();
