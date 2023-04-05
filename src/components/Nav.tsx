@@ -10,7 +10,7 @@ export default function Nav({ route }: Props) {
 
   return (
     <nav
-      className={`bg-neutral-900 px-10 font-medium text-white shadow-md ${
+      className={`bg-neutral-900 px-4 text-xs font-medium text-white shadow-md sm:px-10 sm:text-base ${
         route === "admin" ? "fixed h-[70px] w-full " : "relative"
       }`}
     >

@@ -1,9 +1,9 @@
 export default function UsersIcon({
   size,
-  fill,
+  active,
 }: {
   size: number;
-  fill: string;
+  active: boolean;
 }) {
   return (
     <svg
@@ -13,23 +13,26 @@ export default function UsersIcon({
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      color={fill}
+      // color={fill}
+      className={`${
+        active ? "stroke-green-500 sm:stroke-neutral-900" : "stroke-gray-200"
+      }`}
     >
       <path
         d="M1 20v-1a7 7 0 017-7v0a7 7 0 017 7v1"
-        stroke={fill}
+        // stroke={fill}
         strokeWidth="1.5"
         strokeLinecap="round"
       ></path>
       <path
         d="M13 14v0a5 5 0 015-5v0a5 5 0 015 5v.5"
-        stroke={fill}
+        // stroke={fill}
         strokeWidth="1.5"
         strokeLinecap="round"
       ></path>
       <path
         d="M8 12a4 4 0 100-8 4 4 0 000 8zM18 9a3 3 0 100-6 3 3 0 000 6z"
-        stroke={fill}
+        // stroke={fill}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"

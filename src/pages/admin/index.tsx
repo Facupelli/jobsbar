@@ -362,8 +362,8 @@ function Consumptions({
         </Modal>
       )}
       <section className="gap-10 ">
-        <nav className="fixed top-[125px] w-full bg-neutral-800 sm:left-[220px] sm:top-[70px] sm:h-[calc(100vh_-_70px)] sm:w-[120px]">
-          <ul className="flex gap-4 px-6 text-neutral-100 sm:grid sm:px-0">
+        <nav className="fixed top-[125px] w-full bg-neutral-200 sm:left-[220px] sm:top-[70px] sm:h-[calc(100vh_-_70px)] sm:w-[120px] sm:bg-neutral-800">
+          <ul className="flex gap-4 px-6 text-neutral-900 sm:grid sm:px-0 sm:text-neutral-100">
             {consumptions.map((category) => (
               <li
                 key={category.id}

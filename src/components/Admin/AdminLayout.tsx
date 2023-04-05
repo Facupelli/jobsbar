@@ -34,11 +34,13 @@ type AdminNavProps = {
 
 function AdminNav({ route, setRoute }: AdminNavProps) {
   return (
-    <nav className="fixed top-[70px] h-[55px] w-full bg-neutral-900 font-semibold text-gray-200 shadow-md sm:h-[calc(100vh_-_70px)] sm:w-[220px]">
+    <nav className="fixed top-[70px] h-[55px] w-full bg-neutral-800 font-semibold text-gray-200 shadow-md sm:h-[calc(100vh_-_70px)] sm:w-[220px] sm:bg-neutral-900">
       <ul className="flex gap-4 overflow-x-auto px-6 py-2 text-sm sm:grid sm:p-4 sm:text-base">
         <li
           className={`p-2 ${
-            route === "home" ? "rounded bg-green-500  text-neutral-900" : ""
+            route === "home"
+              ? "rounded text-green-500 sm:bg-green-500  sm:text-neutral-900"
+              : ""
           }`}
         >
           <button
@@ -46,10 +48,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
-              <StatsUpIcon
-                size={22}
-                fill={route === "home" ? "#171717" : "#f5f5f5"}
-              />
+              <StatsUpIcon size={22} active={route === "home"} />
             </div>
             <p>Inicio</p>
           </button>
@@ -58,7 +57,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         <li
           className={`p-2 ${
             route === "memberships"
-              ? "rounded bg-green-500  text-neutral-900"
+              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
               : ""
           }`}
         >
@@ -67,10 +66,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
-              <CardIcon
-                size={22}
-                fill={route === "memberships" ? "#171717" : "#f5f5f5"}
-              />
+              <CardIcon size={22} active={route === "memberships"} />
             </div>
             <p>Membresías</p>
           </button>
@@ -79,7 +75,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         <li
           className={`p-2 ${
             route === "consumptions"
-              ? "rounded bg-green-500  text-neutral-900"
+              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
               : ""
           }`}
         >
@@ -88,10 +84,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
-              <BagIcon
-                size={22}
-                fill={route === "consumptions" ? "#171717" : "#f5f5f5"}
-              />
+              <BagIcon size={22} active={route === "consumptions"} />
             </div>
             <p>Consumiciones</p>
           </button>
@@ -100,7 +93,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         <li
           className={`p-2 ${
             route === "promotions"
-              ? "rounded bg-green-500  text-neutral-900"
+              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
               : ""
           }`}
         >
@@ -109,10 +102,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
-              <PercentageIcon
-                size={22}
-                fill={route === "promotions" ? "#171717" : "#f5f5f5"}
-              />
+              <PercentageIcon size={22} active={route === "promotions"} />
             </div>
             <p>Promociones</p>
           </button>
@@ -120,7 +110,9 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
 
         <li
           className={`p-2 ${
-            route === "users" ? "rounded bg-green-500 text-neutral-900" : ""
+            route === "users"
+              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
+              : ""
           }`}
         >
           <button
@@ -128,10 +120,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
             className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
-              <UsersIcon
-                size={22}
-                fill={route === "users" ? "#171717" : "#f5f5f5"}
-              />
+              <UsersIcon size={22} active={route === "users"} />
             </div>
             <p>Usuarios</p>
           </button>
