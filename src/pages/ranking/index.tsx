@@ -82,9 +82,9 @@ export default function Ranking({ allGames }: Props) {
 
       <Nav />
 
-      <main className="min-h-screen  bg-neutral-200 px-10">
+      <main className="min-h-screen  bg-neutral-200 px-4 sm:px-10">
         <h1 className="pt-6 font-light">Elige un ranking:</h1>
-        <ul className="flex gap-2 py-6">
+        <ul className="flex flex-wrap gap-2 py-6">
           {allGames.map((game) => (
             <li
               key={game.id}

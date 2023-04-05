@@ -20,7 +20,7 @@ export default function AdminLayout({
   return (
     <div className="flex gap-2">
       <AdminNav route={route} setRoute={setRoute} />
-      <div className="ml-[220px] mt-[70px] w-full max-w-screen-2xl p-6">
+      <div className="mt-[140px] w-full max-w-screen-2xl p-6 sm:ml-[220px] sm:mt-[70px]">
         {children}
       </div>
     </div>
@@ -34,8 +34,8 @@ type AdminNavProps = {
 
 function AdminNav({ route, setRoute }: AdminNavProps) {
   return (
-    <nav className="fixed top-[70px] h-[calc(100vh_-_70px)] w-[220px] bg-neutral-900 font-semibold text-gray-200 shadow-md">
-      <ul className="grid gap-4 p-4">
+    <nav className="fixed top-[70px] w-full bg-neutral-900 font-semibold text-gray-200 shadow-md sm:h-[calc(100vh_-_70px)] sm:w-[220px]">
+      <ul className="flex gap-4 overflow-x-auto px-6 py-2 text-sm sm:grid sm:p-4 sm:px-0 sm:text-base">
         <li
           className={`p-2 ${
             route === "home" ? "rounded bg-green-500  text-neutral-900" : ""
@@ -43,7 +43,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         >
           <button
             onClick={() => setRoute("home")}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
               <StatsUpIcon
@@ -64,7 +64,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         >
           <button
             onClick={() => setRoute("memberships")}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
               <CardIcon
@@ -85,7 +85,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         >
           <button
             onClick={() => setRoute("consumptions")}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
               <BagIcon
@@ -106,7 +106,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         >
           <button
             onClick={() => setRoute("promotions")}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
               <PercentageIcon
@@ -125,7 +125,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         >
           <button
             onClick={() => setRoute("users")}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-4"
           >
             <div className="">
               <UsersIcon
