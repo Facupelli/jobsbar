@@ -28,6 +28,7 @@ import type {
 } from "~/types/admin";
 import DeleteModal from "~/components/DeleteModal";
 import LastTd from "~/components/Admin/LastTD";
+import Pagination from "~/components/Pagination";
 
 export type Routes =
   | "home"
@@ -38,19 +39,13 @@ export type Routes =
 
 export default function Admin() {
   const memberships = api.membership.getAllMemberships.useQuery();
-  const users = api.user.getAllUsers.useQuery();
   const promotions = api.promotions.getAllPromotions.useQuery();
   const consumptionsByCategories =
     api.consumptions.getConsumptionsGrouped.useQuery();
 
   const [route, setRoute] = useState<Routes>("home");
 
-  if (
-    !memberships.data ||
-    !users.data ||
-    !promotions.data ||
-    !consumptionsByCategories.data
-  ) {
+  if (!memberships.data || !promotions.data || !consumptionsByCategories.data) {
     return <div>404</div>;
   }
 
@@ -80,12 +75,7 @@ export default function Admin() {
               memberships={memberships.data}
             />
           )}
-          {route === "users" && (
-            <Users
-              users={users.data?.allUsers}
-              totalUsers={users.data?.usersCount}
-            />
-          )}
+          {route === "users" && <Users />}
         </AdminLayout>
       </main>
     </div>
@@ -761,8 +751,18 @@ function CreatePromotion({
   );
 }
 
-function Users({ users, totalUsers }: { users: User[]; totalUsers: number }) {
+function Users() {
+  const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
+
+  const pageSize = 10;
+
+  const users = api.user.getAllUsers.useQuery({
+    take: pageSize,
+    skip: (currentPage - 1) * pageSize,
+  });
+
+  if (!users.data) return <div>404</div>;
 
   return (
     <>
@@ -784,7 +784,7 @@ function Users({ users, totalUsers }: { users: User[]; totalUsers: number }) {
           </button>
         </div>
         <Table trTitles={["", "Nombre", "ID"]}>
-          {users.map((user, i) => (
+          {users.data.allUsers.map((user, i) => (
             <tr key={user.id}>
               <td className="border-b border-gray-300 p-3">{i + 1}</td>
               <td className="border-b border-gray-300 p-3">
@@ -794,6 +794,12 @@ function Users({ users, totalUsers }: { users: User[]; totalUsers: number }) {
             </tr>
           ))}
         </Table>
+        <Pagination
+          totalCount={users.data.usersCount}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onPageChange={(page) => setCurrentPage(page as number)}
+        />
       </section>
     </>
   );
@@ -852,7 +858,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     await ssg.membership.getAllMemberships.prefetch();
     await ssg.consumptions.getConsumptionsGrouped.prefetch();
     await ssg.promotions.getAllPromotions.prefetch();
-    await ssg.user.getAllUsers.prefetch();
+    await ssg.user.getAllUsers.prefetch({
+      take: 10,
+      skip: 0,
+    });
 
     return {
       props: {
