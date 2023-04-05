@@ -88,17 +88,17 @@ const UserDetail: NextPage<Props> = ({ id }) => {
 
       <Nav />
 
-      <main className="min-h-screen bg-neutral-200 px-10 pb-10">
-        <div className="mx-auto grid max-w-screen-xl gap-20">
-          <section className="grid grid-cols-12 gap-10 pt-10">
-            <section className="col-span-8 grid grid-cols-2 gap-2">
+      <main className="min-h-screen bg-neutral-200 px-4 pb-10 sm:px-10">
+        <div className="mx-auto grid max-w-screen-xl gap-10 sm:gap-20">
+          <section className="flex flex-col-reverse gap-10 pt-10 sm:flex-row">
+            <section className="grid basis-3/5 grid-cols-2 gap-2">
               <ConsumptionButtons
                 consumptions={consumptions.data}
                 consumptionActive={consumptionActive}
                 setConsumptionActive={setConsumptionActive}
               />
             </section>
-            <section className="col-span-4">
+            <section className="h-[250px] grow sm:h-auto">
               <MembershipCard user={user.data} />
             </section>
           </section>
@@ -212,7 +212,7 @@ function MembershipCard({
         </p>
       </div>
       <div>
-        <p>{user.name}</p>
+        <p className="text-lg font-medium text-green-500">{user.name}</p>
         <p>
           Acumulados: <strong>{user.totalPoints}</strong>
         </p>
@@ -267,7 +267,7 @@ function ConsumptionsList({
   return (
     <div className="grid gap-6">
       <SearchInput register={register} />
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         {filteredConsumptions.map((consumption) => (
           <div
             key={consumption.name}
@@ -349,7 +349,7 @@ function PromotionsList({
   return (
     <div className="grid gap-4">
       <SearchInput register={register} />
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         {filteredPromos?.map((promo) => (
           <div
             key={promo.id}
@@ -418,7 +418,7 @@ function LastConsumptions({ userId }: { userId: string }) {
   return (
     <details className="rounded-sm bg-white p-4">
       <summary className="cursor-pointer">Últimas consumiciones:</summary>
-      <div className="pt-4">
+      <div className=" pt-4">
         <Table trTitles={["consumición", "ganó?", "cantidad", "fecha"]}>
           {userLastConsumptions.data.consumptions.map((consumption) => (
             <tr key={consumption.id}>
@@ -501,9 +501,9 @@ function TotalConsumptions({
   return (
     <details className="rounded-sm bg-white p-4">
       <summary className="cursor-pointer">Consumiciones totales:</summary>
-      <div className="grid grid-cols-3 gap-4 pt-4">
+      <div className="flex flex-wrap gap-4 pt-4">
         {userConsumptionsGrouped.map((category) => (
-          <div key={category.id} className="col-span-1">
+          <div key={category.id} className="grow">
             <p className="pb-2 pl-1 text-sm font-light">{category.name}</p>
             <Table key={category.id} trTitles={["Nombre", "Cantidad"]}>
               {category.consumptions.map((consumption) => (
