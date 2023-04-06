@@ -233,7 +233,7 @@ function ConsumptionsList({
 }) {
   const ctx = api.useContext();
   const { register, watch } = useForm<{ name: string }>();
-  const { mutate } = api.user.postConsumptionOnUser.useMutation();
+  const { mutate, isLoading } = api.user.postConsumptionOnUser.useMutation();
 
   const searchInput = watch("name");
   let filteredConsumptions = selectedConsumption.consumptions;
@@ -280,6 +280,7 @@ function ConsumptionsList({
               <p className="text-sm">{consumption.points} pts</p>
             </div>
             <button
+              disabled={isLoading}
               onClick={() =>
                 handlePostConsumption(
                   userId,
@@ -310,7 +311,8 @@ function PromotionsList({
 }) {
   const ctx = api.useContext();
   const { register, watch } = useForm<{ name: string }>();
-  const { mutate } = api.promotions.postPromotionOnUser.useMutation();
+  const { mutate, isLoading } =
+    api.promotions.postPromotionOnUser.useMutation();
 
   if (!validPromotions) return <div>404</div>;
 
@@ -363,7 +365,7 @@ function PromotionsList({
               <p className="text-base">-{promo.points} pts</p>
             </div>
             <button
-              disabled={userTotalPoints - promo.points <= 0}
+              disabled={userTotalPoints - promo.points <= 0 || isLoading}
               type="button"
               onClick={() =>
                 handlePostPromotion(userId, promo.id, promo.points)
