@@ -32,6 +32,8 @@ import type {
 import type { Promotion, User } from "~/types/model";
 import type { Membership } from "~/types/model";
 import type { ConsumptionOnUser } from "~/types/model";
+import XMarkIcon from "~/icons/XMarkIcon";
+import CheckIcon from "~/icons/CheckIcon";
 
 type Props = {
   id: string;
@@ -506,9 +508,9 @@ function LastConsumptions({ userId }: { userId: string }) {
                       </button>
                     </div>
                   ) : consumption.winner ? (
-                    "SI"
+                    <CheckIcon size={20} />
                   ) : (
-                    "NO"
+                    <XMarkIcon size={20} />
                   ))}
               </td>
               <td className="border-b border-gray-300 p-3">
