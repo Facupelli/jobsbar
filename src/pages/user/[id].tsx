@@ -236,12 +236,24 @@ function ConsumptionsList({
   const { mutate, isLoading } = api.user.postConsumptionOnUser.useMutation();
 
   const searchInput = watch("name");
-  let filteredConsumptions = selectedConsumption.consumptions;
-  if (searchInput) {
-    filteredConsumptions = selectedConsumption.consumptions.filter((c) =>
-      c.name.toLowerCase().includes(searchInput.toLowerCase())
-    );
-  }
+
+  const filterConsumptions = (
+    searchInput: string,
+    selectedConsumption: ConsumptionsGrouped
+  ) => {
+    if (searchInput) {
+      return selectedConsumption.consumptions.filter((c) =>
+        c.name.toLowerCase().includes(searchInput.toLowerCase())
+      );
+    }
+
+    return selectedConsumption.consumptions;
+  };
+
+  const filteredConsumptions = filterConsumptions(
+    searchInput,
+    selectedConsumption
+  );
 
   const handlePostConsumption = (
     userId: string,
@@ -254,6 +266,8 @@ function ConsumptionsList({
         onSuccess: () => {
           void ctx.user.getUserConsumptionsGrouped.invalidate();
           void ctx.user.getUser.invalidate();
+          void ctx.user.getTotalUserConsumptions.invalidate();
+          void ctx.user.getUserLastConsumptions.invalidate();
 
           //post al scoket
           void axios.post(`http://localhost:3000/api/socket/postConsumption`, {
@@ -269,33 +283,56 @@ function ConsumptionsList({
       <SearchInput register={register} />
       <div className="flex flex-wrap gap-4">
         {filteredConsumptions.map((consumption) => (
-          <div
+          <ConsumptionItem
             key={consumption.name}
-            className="flex items-center gap-10 rounded bg-neutral-300 p-2"
-          >
-            <div>
-              <p className="text-sm">
-                <strong className="font-semibold">{consumption.name}</strong>
-              </p>
-              <p className="text-sm">{consumption.points} pts</p>
-            </div>
-            <button
-              disabled={isLoading}
-              onClick={() =>
-                handlePostConsumption(
-                  userId,
-                  consumption.id,
-                  consumption.points
-                )
-              }
-              type="button"
-              className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
-            >
-              Cargar
-            </button>
-          </div>
+            consumption={consumption}
+            isLoading={isLoading}
+            userId={userId}
+            handlePostConsumption={handlePostConsumption}
+          />
         ))}
       </div>
+    </div>
+  );
+}
+
+function ConsumptionItem({
+  consumption,
+  isLoading,
+  userId,
+  handlePostConsumption,
+}: {
+  consumption: {
+    name: string;
+    points: number;
+    id: string;
+  };
+  isLoading: boolean;
+  userId: string;
+  handlePostConsumption: (
+    userId: string,
+    consumptionId: string,
+    points: number
+  ) => void;
+}) {
+  return (
+    <div className="flex items-center gap-10 rounded bg-neutral-300 p-2">
+      <div>
+        <p className="text-sm">
+          <strong className="font-semibold">{consumption.name}</strong>
+        </p>
+        <p className="text-sm">{consumption.points} pts</p>
+      </div>
+      <button
+        disabled={isLoading}
+        onClick={() =>
+          handlePostConsumption(userId, consumption.id, consumption.points)
+        }
+        type="button"
+        className="ml-auto rounded-xl bg-neutral-900 p-1 text-sm text-neutral-100"
+      >
+        Cargar
+      </button>
     </div>
   );
 }
@@ -405,6 +442,8 @@ function LastConsumptions({ userId }: { userId: string }) {
       {
         onSuccess: () => {
           void ctx.user.getUser.invalidate();
+          void ctx.user.getTotalUserConsumptions.invalidate();
+          void ctx.user.getUserLastConsumptions.invalidate();
 
           // post al socket
           void axios.post(`http://localhost:3000/api/socket/gameOver`, {
