@@ -61,7 +61,11 @@ export default function Pagination({
           return (
             <li
               key={pageNumber}
-              className=" cursor-pointer border-r border-neutral-300 px-2 last:border-none"
+              className={`cursor-pointer border-r border-neutral-300 px-2 last:border-none ${
+                currentPage === pageNumber
+                  ? "text-neutral-900"
+                  : "text-neutral-400"
+              }`}
               onClick={() => onPageChange(pageNumber)}
             >
               {pageNumber}
