@@ -277,7 +277,13 @@ function ConsumptionsList({
         }
       );
     },
-    [mutate, userId]
+    [
+      mutate,
+      ctx.user.getUserConsumptionsGrouped,
+      ctx.user.getUser,
+      ctx.user.getTotalUserConsumptions,
+      ctx.user.getUserLastConsumptions,
+    ]
   );
 
   return (
