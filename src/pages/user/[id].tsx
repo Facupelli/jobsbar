@@ -5,7 +5,13 @@ import superjason from "superjson";
 import { type GetStaticProps, type NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
@@ -237,10 +243,7 @@ function ConsumptionsList({
 
   const searchInput = watch("name");
 
-  const filterConsumptions = (
-    searchInput: string,
-    selectedConsumption: ConsumptionsGrouped
-  ) => {
+  const filteredConsumptions = useMemo(() => {
     if (searchInput) {
       return selectedConsumption.consumptions.filter((c) =>
         c.name.toLowerCase().includes(searchInput.toLowerCase())
@@ -248,35 +251,34 @@ function ConsumptionsList({
     }
 
     return selectedConsumption.consumptions;
-  };
+  }, [searchInput, selectedConsumption.consumptions]);
 
-  const filteredConsumptions = filterConsumptions(
-    searchInput,
-    selectedConsumption
+  // const filteredConsumptions = filterConsumptions();
+
+  const handlePostConsumption = useCallback(
+    (userId: string, consumptionId: string, points: number) => {
+      mutate(
+        { userId, consumptionId, points, quantity: 1 },
+        {
+          onSuccess: () => {
+            void ctx.user.getUserConsumptionsGrouped.invalidate();
+            void ctx.user.getUser.invalidate();
+            void ctx.user.getTotalUserConsumptions.invalidate();
+            void ctx.user.getUserLastConsumptions.invalidate();
+
+            //post al scoket
+            void axios.post(
+              `http://localhost:3000/api/socket/postConsumption`,
+              {
+                consumptionType: name,
+              }
+            );
+          },
+        }
+      );
+    },
+    [mutate, userId]
   );
-
-  const handlePostConsumption = (
-    userId: string,
-    consumptionId: string,
-    points: number
-  ) => {
-    mutate(
-      { userId, consumptionId, points, quantity: 1 },
-      {
-        onSuccess: () => {
-          void ctx.user.getUserConsumptionsGrouped.invalidate();
-          void ctx.user.getUser.invalidate();
-          void ctx.user.getTotalUserConsumptions.invalidate();
-          void ctx.user.getUserLastConsumptions.invalidate();
-
-          //post al scoket
-          void axios.post(`http://localhost:3000/api/socket/postConsumption`, {
-            consumptionType: name,
-          });
-        },
-      }
-    );
-  };
 
   return (
     <div className="grid gap-6">
