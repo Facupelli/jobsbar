@@ -253,8 +253,6 @@ function ConsumptionsList({
     return selectedConsumption.consumptions;
   }, [searchInput, selectedConsumption.consumptions]);
 
-  // const filteredConsumptions = filterConsumptions();
-
   const handlePostConsumption = useCallback(
     (userId: string, consumptionId: string, points: number) => {
       mutate(
@@ -362,12 +360,15 @@ function PromotionsList({
   if (!validPromotions) return <div>404</div>;
 
   const searchInput = watch("name");
-  let filteredPromos = validPromotions;
-  if (searchInput) {
-    filteredPromos = validPromotions.filter((p) =>
-      p.name.toLowerCase().includes(searchInput.toLowerCase())
-    );
-  }
+
+  const filteredPromos = useMemo(() => {
+    if (searchInput) {
+      return validPromotions.filter((p) =>
+        p.name.toLowerCase().includes(searchInput.toLowerCase())
+      );
+    }
+    return validPromotions;
+  }, [searchInput, validPromotions]);
 
   const handlePostPromotion = (
     userId: string,
