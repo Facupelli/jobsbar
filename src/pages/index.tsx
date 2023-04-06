@@ -53,6 +53,9 @@ function LoginInput() {
 
   const onSubmit = useCallback(
     (id: string) => {
+      if (submitError) {
+        return;
+      }
       mutate(
         { id },
         {
