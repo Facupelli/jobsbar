@@ -33,6 +33,9 @@ type AdminNavProps = {
 };
 
 function AdminNav({ route, setRoute }: AdminNavProps) {
+  const activeClassname =
+    "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900";
+
   return (
     <nav className="fixed top-[70px] h-[55px] w-full bg-neutral-800 font-semibold text-gray-200 shadow-md sm:h-[calc(100vh_-_70px)] sm:w-[220px] sm:bg-neutral-900">
       <ul className="flex gap-4 overflow-x-auto px-6 py-2 text-sm sm:grid sm:p-4 sm:text-base">
@@ -54,13 +57,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
           </button>
         </li>
 
-        <li
-          className={`p-2 ${
-            route === "memberships"
-              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
-              : ""
-          }`}
-        >
+        <li className={`p-2 ${route === "memberships" ? activeClassname : ""}`}>
           <button
             onClick={() => setRoute("memberships")}
             className="flex items-center gap-2 sm:gap-4"
@@ -73,11 +70,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
         </li>
 
         <li
-          className={`p-2 ${
-            route === "consumptions"
-              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
-              : ""
-          }`}
+          className={`p-2 ${route === "consumptions" ? activeClassname : ""}`}
         >
           <button
             onClick={() => setRoute("consumptions")}
@@ -90,13 +83,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
           </button>
         </li>
 
-        <li
-          className={`p-2 ${
-            route === "promotions"
-              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
-              : ""
-          }`}
-        >
+        <li className={`p-2 ${route === "promotions" ? activeClassname : ""}`}>
           <button
             onClick={() => setRoute("promotions")}
             className="flex items-center gap-2 sm:gap-4"
@@ -108,13 +95,7 @@ function AdminNav({ route, setRoute }: AdminNavProps) {
           </button>
         </li>
 
-        <li
-          className={`p-2 ${
-            route === "users"
-              ? "rounded text-green-500 sm:bg-green-500 sm:text-neutral-900"
-              : ""
-          }`}
-        >
+        <li className={`p-2 ${route === "users" ? activeClassname : ""}`}>
           <button
             onClick={() => setRoute("users")}
             className="flex items-center gap-2 sm:gap-4"
